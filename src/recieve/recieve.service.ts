@@ -17,6 +17,6 @@ export class RecieveService {
       tag: 'HUMAN_AGENT',
     };
 
-    this.graphService.sendMessage(body, access_token);
+    return this.graphService.sendMessage(body, access_token);
   }
 }

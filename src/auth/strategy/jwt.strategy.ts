@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload: string) {
     const decodedIdToken: DecodedIdToken = await auth().verifyIdToken(payload);
 
-    const user = this.prisma.user.findOne({
+    const user = this.prisma.user.findFirstOrThrow({
       where: {
         firebase_uid: decodedIdToken.uid,
       },

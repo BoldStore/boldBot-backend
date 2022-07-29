@@ -5,14 +5,12 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GraphService } from 'src/graph/graph.service';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { RecieveService } from 'src/recieve/recieve.service';
 import { WebhookDto } from './dto';
 
 @Injectable()
 export class WebhookService {
   constructor(
-    private prisma: PrismaService,
     private config: ConfigService,
     private recieveService: RecieveService,
     private graphService: GraphService,

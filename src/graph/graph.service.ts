@@ -5,7 +5,7 @@ import { MessageDto } from './dto';
 
 @Injectable()
 export class GraphService {
-  async sendMessage(body: MessageDto, access_token: string) {
+  async sendMessageApi(body: MessageDto, access_token: string) {
     try {
       await axios.post(
         `${API_URL}/me/messages?access_token=${access_token}`,

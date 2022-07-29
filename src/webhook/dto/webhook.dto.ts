@@ -26,23 +26,15 @@ export type WebhookType = {
     is_deleted?: boolean;
     is_echo?: boolean;
     is_unsupported?: boolean;
-    quick_reply?: {
-      payload: string;
-    };
-    postback?: {
-      payload: string;
-    };
-    referral?: {
-      product: {
-        id: string;
-      };
-    };
     reply_to?: {
       mid: string;
       story?: {
         id: string;
         url: string;
       };
+    };
+    quick_reply?: {
+      payload: string;
     };
   };
   reaction?: {
@@ -55,6 +47,11 @@ export type WebhookType = {
     mid: string;
     title: string;
     payload: string;
+  };
+  referral?: {
+    product: {
+      id: string;
+    };
   };
 };
 

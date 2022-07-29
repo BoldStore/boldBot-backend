@@ -11,7 +11,6 @@ export class MessageDto {
     text: string;
   };
 
-  @IsNotEmpty()
   @IsString()
-  tag: string;
+  tag?: string;
 }

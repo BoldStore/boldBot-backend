@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GraphService } from 'src/graph/graph.service';
+import { WebhookType } from 'src/webhook/dto';
 
 @Injectable()
 export class RecieveService {
@@ -18,5 +19,19 @@ export class RecieveService {
     };
 
     return this.graphService.sendMessage(body, access_token);
+  }
+
+  handleMessage(insta_id: string, webhookEvent: WebhookType) {
+    try {
+      return {
+        insta_id,
+        webhookEvent,
+      };
+    } catch (e) {
+      return {
+        message: 'Error handling message',
+        error: e,
+      };
+    }
   }
 }

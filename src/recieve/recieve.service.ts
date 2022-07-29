@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GraphService } from 'src/graph/graph.service';
-import { WebhookType } from 'src/webhook/dto';
+import { UserDto, WebhookType } from 'src/webhook/dto';
 
 @Injectable()
 export class RecieveService {
@@ -45,7 +45,7 @@ export class RecieveService {
     return this.graphService.sendMessageApi(body, access_token);
   }
 
-  handleMessage(insta_id: string, webhookEvent: WebhookType) {
+  handleMessage(user: UserDto, webhookEvent: WebhookType) {
     let responses: any;
     try {
       if (webhookEvent.message) {
@@ -78,11 +78,11 @@ export class RecieveService {
     if (Array.isArray(responses)) {
       let delay = 0;
       for (const response of responses) {
-        this.sendMessage(response, insta_id, delay * 2000);
+        this.sendMessage(response, user.insta_id, delay * 2000);
         delay++;
       }
     } else {
-      this.sendMessage(responses, insta_id);
+      this.sendMessage(responses, user.insta_id);
     }
   }
 

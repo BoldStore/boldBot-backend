@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RecieveService } from 'src/recieve/recieve.service';
 import { WebhookDto } from './dto';
@@ -14,6 +15,7 @@ export class WebhookService {
     private prisma: PrismaService,
     private config: ConfigService,
     private recieveService: RecieveService,
+    private graphService: GraphService,
   ) {}
 
   verifyWebhook(challenge: string, mode: string, verifyToken: string) {
@@ -26,7 +28,7 @@ export class WebhookService {
     throw new ForbiddenException('Access denied');
   }
 
-  getWebhook(body: WebhookDto) {
+  async getWebhook(body: WebhookDto) {
     if (body.object === 'page') {
       throw new NotFoundException('Page webhook not implemented');
     }
@@ -57,7 +59,9 @@ export class WebhookService {
 
         const insta_id = webhookEvent?.sender?.id;
 
-        this.recieveService.handleMessage(insta_id, webhookEvent);
+        const userProfile = await this.graphService.getUserProfile(insta_id);
+
+        this.recieveService.handleMessage(userProfile, webhookEvent);
       }
     }
 

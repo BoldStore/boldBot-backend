@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { API_URL } from 'src/constants';
+import { UserDto } from 'src/webhook/dto';
 import { MessageDto } from './dto';
 
 @Injectable()
@@ -19,12 +20,20 @@ export class GraphService {
   async getUserProfile(insta_id: string) {
     try {
       const url = `${API_URL}/${insta_id}`;
-      await axios.get(url, {
+      const response = await axios.get(url, {
         params: {
           access_token: '',
           fields: 'name,profile_pic',
         },
       });
+
+      const user: UserDto = {
+        name: response?.data?.name,
+        profilePic: response?.data?.profile_pic,
+        insta_id,
+      };
+
+      return user;
     } catch (e) {
       throw new HttpException(e?.response?.data, e?.response?.status);
     }

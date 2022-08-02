@@ -9,7 +9,7 @@ import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class FirebaseStrategy extends PassportStrategy(
+export class UserStrategy extends PassportStrategy(
   FirebaseAuthStrategy,
   'user',
 ) {

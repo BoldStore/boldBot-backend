@@ -1,6 +1,6 @@
 import { AuthGuard } from '@nestjs/passport';
 
-export class FirebaseGuard extends AuthGuard('firebase') {
+export class UserGuard extends AuthGuard('user') {
   constructor() {
     super();
   }

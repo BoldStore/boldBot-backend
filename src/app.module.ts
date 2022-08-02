@@ -4,6 +4,7 @@ import { WebhookModule } from './webhook/webhook.module';
 import { RecieveModule } from './recieve/recieve.module';
 import { GraphModule } from './graph/graph.module';
 import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
     RecieveModule,
     GraphModule,
     AuthModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],

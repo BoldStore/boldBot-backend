@@ -16,6 +16,7 @@ model User {
   facebook_id  String    @unique
   name         String?
   firebase_uid String
+  profile_pic  String?
   pages        Page[]
   messages     Message[]
 

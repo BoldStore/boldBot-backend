@@ -15,6 +15,7 @@ export class UserService {
         name: firebaseUser.name,
         facebook_id: firebaseUser.uid,
         firebase_uid: firebaseUser.uid,
+        profile_pic: firebaseUser.picture,
       },
     });
     return user;

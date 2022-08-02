@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FirebaseUser } from '@tfarras/nestjs-firebase-auth';
+import { User } from '@prisma/client';
+import { PageDto } from './dto';
 
 @Injectable()
 export class UserService {
@@ -16,5 +18,18 @@ export class UserService {
       },
     });
     return user;
+  }
+
+  async addPage(user: User, dto: PageDto) {
+    // TODO: get data
+    const page = await this.prisma.page.create({
+      data: {
+        userId: user.id,
+        page_access_token: dto.long_lived_token,
+        page_id: '',
+        page_name: '',
+      },
+    });
+    return page;
   }
 }

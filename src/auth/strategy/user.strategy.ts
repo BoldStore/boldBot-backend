@@ -13,7 +13,7 @@ export class UserStrategy extends PassportStrategy(
   FirebaseAuthStrategy,
   'user',
 ) {
-  public constructor(private prisma: PrismaService) {
+  constructor(private prisma: PrismaService) {
     super({
       extractor: ExtractJwt.fromAuthHeaderAsBearerToken(),
     });

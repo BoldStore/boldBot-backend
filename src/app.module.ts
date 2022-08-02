@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { RecieveModule } from './recieve/recieve.module';
 import { GraphModule } from './graph/graph.module';
@@ -10,7 +9,6 @@ import { GraphModule } from './graph/graph.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    AuthModule,
     WebhookModule,
     RecieveModule,
     GraphModule,

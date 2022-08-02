@@ -1000,6 +1000,11 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
+"@tfarras/nestjs-firebase-auth@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@tfarras/nestjs-firebase-auth/-/nestjs-firebase-auth-2.0.0.tgz#4599a1444ab71b11beb3122c9cf11ddca06b8857"
+  integrity sha512-uZB/e/STnhSf1lrtJWkq3ORx1thZlRa9aNNtb/vRMHweV6EocvShuhvaJTJVEPhtvqGul2HiokwnOhoTgXaacA==
+
 "@tootallnate/once@2":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
@@ -1913,6 +1918,11 @@ cjs-module-lexer@^1.0.0:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/cjs-module-lexer/-/cjs-module-lexer-1.2.2.tgz#9f84ba3244a512f3a54e5277e8eef4c489864e40"
   integrity sha512-cOU9usZw8/dXIXKtwa8pM0OTJQuJkxMN6w30csNRUerHfeQ5R6U3kkU/FtJeIf3M202OHfY2U8ccInBG7/xogA==
+
+class-transformer@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.5.1.tgz#24147d5dffd2a6cea930a3250a677addf96ab336"
+  integrity sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw==
 
 class-validator@^0.13.2:
   version "0.13.2"

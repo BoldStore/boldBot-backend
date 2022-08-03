@@ -43,7 +43,7 @@ export class RecieveService {
     if (Array.isArray(responses)) {
       let delay = 0;
       for (const response of responses) {
-        this.sendMessage(response, user.insta_id, delay * 2000);
+        this.sendMessage(response, user.insta_id, delay * 1500);
         delay++;
       }
     } else {

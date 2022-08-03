@@ -3,10 +3,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { FirebaseUser } from '@tfarras/nestjs-firebase-auth';
 import { User } from '@prisma/client';
 import { PageDto } from './dto';
+import { GraphService } from 'src/graph/graph.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private graphService: GraphService,
+  ) {}
 
   async createUser(firebaseUser: FirebaseUser) {
     const user = await this.prisma.user.create({
@@ -22,13 +26,14 @@ export class UserService {
   }
 
   async addPage(user: User, dto: PageDto) {
-    // TODO: get data
+    const data = await this.graphService.getUserId(dto.access_token);
+
     const page = await this.prisma.page.create({
       data: {
         userId: user.id,
         page_access_token: dto.long_lived_token,
-        page_id: '',
-        page_name: '',
+        page_id: data.id,
+        page_name: data.name,
       },
     });
     return page;

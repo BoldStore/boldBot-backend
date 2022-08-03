@@ -1,5 +1,5 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { API_URL } from 'src/constants';
 import { UserDto } from 'src/webhook/dto';
 import { MessageDto } from './dto';
@@ -17,12 +17,12 @@ export class GraphService {
     }
   }
 
-  async getUserId(access_token: string) {
+  async getUserId(access_token: string): Promise<{ name: string; id: string }> {
     try {
-      const response: { name: string; id: string } = await axios.get(
+      const response: AxiosResponse = await axios.get(
         `${API_URL}/me?access_token=${access_token}`,
       );
-      return response;
+      return response.data;
     } catch (e) {
       throw new HttpException(e.response.data, e.response.status);
     }

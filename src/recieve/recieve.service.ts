@@ -5,10 +5,7 @@ import { UserDto, WebhookType } from 'src/webhook/dto';
 
 @Injectable()
 export class RecieveService {
-  webhookEvent: WebhookType;
-  constructor(private graphService: GraphService, webhookEvent: WebhookType) {
-    this.webhookEvent = webhookEvent;
-  }
+  constructor(private graphService: GraphService) {}
 
   handleMessage(user: UserDto, webhookEvent: WebhookType) {
     let responses: any;
@@ -18,16 +15,16 @@ export class RecieveService {
         if (message.is_echo) {
           return;
         } else if (message.quick_reply) {
-          responses = this.handleQuickReply();
+          responses = this.handleQuickReply(webhookEvent);
         } else if (message.attachments) {
           responses = this.handleAttachmentMessage();
         } else if (message.text) {
-          responses = this.handleTextMessage();
+          responses = this.handleTextMessage(webhookEvent);
         }
       } else if (webhookEvent.postback) {
-        responses = this.handlePostback();
+        responses = this.handlePostback(webhookEvent);
       } else if (webhookEvent.referral) {
-        responses = this.handleReferral();
+        responses = this.handleReferral(webhookEvent);
       }
     } catch (e) {
       responses = {
@@ -51,14 +48,14 @@ export class RecieveService {
     }
   }
 
-  handleQuickReply() {
-    const payload = this.webhookEvent.message.quick_reply.payload;
+  handleQuickReply(webhookEvent: WebhookType) {
+    const payload = webhookEvent.message.quick_reply.payload;
 
     return this.handlePayload(payload);
   }
 
-  handlePostback() {
-    const postback = this.webhookEvent.postback;
+  handlePostback(webhookEvent: WebhookType) {
+    const postback = webhookEvent.postback;
 
     let payload: string;
     if (postback.referral && postback.referral.type == 'OPEN_THREAD') {
@@ -69,8 +66,8 @@ export class RecieveService {
     return this.handlePayload(payload.toUpperCase());
   }
 
-  handleReferral() {
-    const payload = this.webhookEvent.referral.ref.toUpperCase();
+  handleReferral(webhookEvent: WebhookType) {
+    const payload = webhookEvent.referral.ref.toUpperCase();
 
     return this.handlePayload(payload);
   }
@@ -90,9 +87,9 @@ export class RecieveService {
     return response;
   }
 
-  handleTextMessage() {
+  handleTextMessage(webhookEvent: WebhookType) {
     let response = '';
-    const message = this.webhookEvent.message.text.trim().toLowerCase();
+    const message = webhookEvent.message.text.trim().toLowerCase();
 
     const greetings = [
       'hi',

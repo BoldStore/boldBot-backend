@@ -4,6 +4,14 @@ enum Fields {
   comments = 'comments',
 }
 
+type ReferralType = {
+  product: {
+    id: string;
+  };
+  ref?: string;
+  type?: string;
+};
+
 export type WebhookType = {
   sender: { id: string };
   recipient: { id: string };
@@ -47,12 +55,9 @@ export type WebhookType = {
     mid: string;
     title: string;
     payload: string;
+    referral?: ReferralType;
   };
-  referral?: {
-    product: {
-      id: string;
-    };
-  };
+  referral?: ReferralType;
 };
 
 export class WebhookDto {

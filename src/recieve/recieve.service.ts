@@ -123,9 +123,11 @@ export class RecieveService {
       if (message.texts.length > 0) {
         const arr = [];
         message.texts.forEach((text) => {
-          arr.push({
-            text: text.value,
-          });
+          if (text.key !== 'fallback') {
+            arr.push({
+              text: text.value,
+            });
+          }
         });
         response = arr;
       } else {
@@ -140,7 +142,21 @@ export class RecieveService {
 
     // Fallback
     if (!response) {
-      response = '';
+      const message = await this.prisma.message.findFirst({
+        where: {
+          type: 'greeting',
+          pageId: page.id,
+          texts: {
+            some: {
+              key: 'fallback',
+            },
+          },
+        },
+        include: {
+          texts: true,
+        },
+      });
+      response = message.texts[0].value;
     }
 
     return response;

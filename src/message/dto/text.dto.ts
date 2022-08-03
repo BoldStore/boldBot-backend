@@ -1,13 +1,13 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
+interface Text {
+  key: string;
+  value: string;
+}
+
 export class TextDto {
   @IsNotEmpty()
-  @IsString()
-  key: string;
-
-  @IsNotEmpty()
-  @IsString()
-  value: string;
+  texts: Text[];
 
   @IsString()
   pageId?: string;

@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Page } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'src/services/response';
 import { UserDto, WebhookType } from 'src/webhook/dto';
 
 @Injectable()
 export class RecieveService {
-  constructor(private graphService: GraphService) {}
+  constructor(
+    private graphService: GraphService,
+    private prisma: PrismaService,
+  ) {}
 
   handleMessage(user: UserDto, webhookEvent: WebhookType, page: Page) {
     let responses: any;
@@ -20,7 +24,7 @@ export class RecieveService {
         } else if (message.attachments) {
           responses = this.handleAttachmentMessage();
         } else if (message.text) {
-          responses = this.handleTextMessage(webhookEvent);
+          responses = this.handleTextMessage(webhookEvent, page);
         }
       } else if (webhookEvent.postback) {
         responses = this.handlePostback(webhookEvent);
@@ -88,8 +92,8 @@ export class RecieveService {
     return response;
   }
 
-  handleTextMessage(webhookEvent: WebhookType) {
-    let response = '';
+  async handleTextMessage(webhookEvent: WebhookType, page: Page) {
+    let response: any;
     const message = webhookEvent.message.text.trim().toLowerCase();
 
     const greetings = [
@@ -105,7 +109,28 @@ export class RecieveService {
 
     // Greeting
     if (greetings.some((greeting) => message.includes(greeting))) {
-      response = '';
+      // Get greeting
+      const message = await this.prisma.message.findFirst({
+        where: {
+          type: 'greeting',
+          pageId: page.id,
+        },
+        include: {
+          texts: true,
+        },
+      });
+
+      if (message.texts.length > 0) {
+        const arr = [];
+        message.texts.forEach((text) => {
+          arr.push({
+            text: text.value,
+          });
+        });
+        response = arr;
+      } else {
+        response = message.texts[0].value;
+      }
     }
 
     // Help

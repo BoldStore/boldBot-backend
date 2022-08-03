@@ -46,7 +46,6 @@ export class MessageService {
           createMany: {
             data: dto.texts.map((text) => {
               return {
-                messageId: greeting.id,
                 key: text.key,
                 value: text.value,
               };

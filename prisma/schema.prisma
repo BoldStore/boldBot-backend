@@ -34,9 +34,9 @@ model Page {
   page_id           String
   page_name         String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  messages  Message?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
 
   @@map("pages")
 }
@@ -47,14 +47,29 @@ model Message {
   user   User   @relation(fields: [userId], references: [id])
   userId String
   page   Page   @relation(fields: [pageId], references: [id])
-  pageId String @unique
+  pageId String
 
   type String
 
-  value String
+  texts Text[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("messages")
+}
+
+model Text {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  message   Message @relation(fields: [messageId], references: [id])
+  messageId String  @unique
+
+  key   String
+  value String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("texts")
 }

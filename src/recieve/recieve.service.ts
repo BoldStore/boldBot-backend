@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Page } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { Response } from 'src/services/response';
 import { UserDto, WebhookType } from 'src/webhook/dto';
@@ -7,7 +8,7 @@ import { UserDto, WebhookType } from 'src/webhook/dto';
 export class RecieveService {
   constructor(private graphService: GraphService) {}
 
-  handleMessage(user: UserDto, webhookEvent: WebhookType) {
+  handleMessage(user: UserDto, webhookEvent: WebhookType, page: Page) {
     let responses: any;
     try {
       if (webhookEvent.message) {
@@ -40,11 +41,11 @@ export class RecieveService {
     if (Array.isArray(responses)) {
       let delay = 0;
       for (const response of responses) {
-        this.sendMessage(response, user.insta_id, delay * 1500);
+        this.sendMessage(response, user.insta_id, page, delay * 1500);
         delay++;
       }
     } else {
-      this.sendMessage(responses, user.insta_id);
+      this.sendMessage(responses, user.insta_id, page);
     }
   }
 
@@ -136,7 +137,12 @@ export class RecieveService {
     return response;
   }
 
-  sendMessage(response: { text: string }, userId: string, delay = 0) {
+  sendMessage(
+    response: { text: string },
+    userId: string,
+    page: Page,
+    delay = 0,
+  ) {
     // Check if there is delay in the response
     if ('delay' in response) {
       delay = response['delay'];
@@ -151,8 +157,7 @@ export class RecieveService {
       message: response,
     };
 
-    // TODO: Get access token
-    const access_token = '';
+    const access_token = page.page_access_token;
 
     setTimeout(
       () => this.graphService.sendMessageApi(requestBody, access_token),

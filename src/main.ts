@@ -1,5 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { initializeApp } from 'firebase-admin/app';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -10,6 +11,8 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+
+  initializeApp();
 
   await app.listen(3001);
 }

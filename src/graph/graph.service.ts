@@ -17,6 +17,17 @@ export class GraphService {
     }
   }
 
+  async getUserId(access_token: string) {
+    try {
+      const response: { name: string; id: string } = await axios.get(
+        `${API_URL}/me?access_token=${access_token}`,
+      );
+      return response;
+    } catch (e) {
+      throw new HttpException(e.response.data, e.response.status);
+    }
+  }
+
   async getUserProfile(insta_id: string) {
     try {
       const url = `${API_URL}/${insta_id}`;

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GraphService } from 'src/graph/graph.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { RecieveService } from 'src/recieve/recieve.service';
 import { WebhookDto } from './dto';
 
@@ -14,6 +15,7 @@ export class WebhookService {
     private config: ConfigService,
     private recieveService: RecieveService,
     private graphService: GraphService,
+    private prisma: PrismaService,
   ) {}
 
   verifyWebhook(challenge: string, mode: string, verifyToken: string) {
@@ -59,7 +61,12 @@ export class WebhookService {
 
         const userProfile = await this.graphService.getUserProfile(insta_id);
 
-        this.recieveService.handleMessage(userProfile, webhookEvent);
+        const page_id = entry.id;
+        const page = await this.prisma.page.findFirst({
+          where: { page_id: page_id },
+        });
+
+        this.recieveService.handleMessage(userProfile, webhookEvent, page);
       }
     }
 

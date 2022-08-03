@@ -9,12 +9,11 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async createUser(firebaseUser: FirebaseUser) {
-    console.log('FIREBASE>>>', firebaseUser.firebase);
     const user = await this.prisma.user.create({
       data: {
         email: firebaseUser.email,
         name: firebaseUser.name,
-        facebook_id: firebaseUser.firebase.tenant,
+        facebook_id: firebaseUser.firebase.identities['facebook.com'][0],
         firebase_uid: firebaseUser.uid,
         profile_pic: firebaseUser.picture,
       },

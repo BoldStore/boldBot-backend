@@ -19,11 +19,6 @@ export class WebhookService {
   ) {}
 
   verifyWebhook(challenge: string, mode: string, verifyToken: string) {
-    console.log('CONFIG>>>', this.config.get('WEBHOOK_VERIFY_TOKEN'));
-    console.log('\n\nMODE>>', mode);
-    console.log('\n\nVERIFY_TOKEN>>', verifyToken);
-    console.log('\n\nCHALLENGE>>', challenge);
-
     if (
       mode === 'subscribe' &&
       verifyToken === this.config.get('WEBHOOK_VERIFY_TOKEN')
@@ -58,6 +53,8 @@ export class WebhookService {
 
       for (let i = 0; i < entry.messaging.length; i++) {
         const webhookEvent = entry.messaging[i];
+
+        console.log('WEBHOOK EVENT>>>', webhookEvent);
 
         if ('message' in webhookEvent && webhookEvent?.message?.is_echo) {
           return;

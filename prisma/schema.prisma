@@ -15,7 +15,7 @@ model User {
   email        String    @unique
   facebook_id  String    @unique
   name         String?
-  firebase_uid String
+  firebase_uid String    @unique
   profile_pic  String?
   pages        Page[]
   messages     Message[]

@@ -13,7 +13,17 @@ export class UserService {
   ) {}
 
   async createUser(firebaseUser: FirebaseUser) {
-    const user = await this.prisma.user.create({
+    const user = await this.prisma.user.findUnique({
+      where: {
+        firebase_uid: firebaseUser.uid,
+      },
+    });
+
+    if (user) {
+      return user;
+    }
+
+    const new_user = await this.prisma.user.create({
       data: {
         email: firebaseUser.email,
         name: firebaseUser.name,
@@ -22,7 +32,7 @@ export class UserService {
         profile_pic: firebaseUser.picture,
       },
     });
-    return user;
+    return new_user;
   }
 
   async addPage(user: User, dto: PageDto) {

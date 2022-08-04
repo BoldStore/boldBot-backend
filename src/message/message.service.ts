@@ -58,7 +58,7 @@ export class MessageService {
   }
 
   async getGreetings(user: User, page_id: string) {
-    const greetings = await this.prisma.message.findMany({
+    const greetings = await this.prisma.message.findFirst({
       where: {
         userId: user.id,
         pageId: page_id,

@@ -56,4 +56,18 @@ export class MessageService {
     });
     return new_greeting;
   }
+
+  async getGreetings(user: User, page_id: string) {
+    const greetings = await this.prisma.message.findMany({
+      where: {
+        userId: user.id,
+        pageId: page_id,
+        type: 'greeting',
+      },
+      include: {
+        texts: true,
+      },
+    });
+    return greetings;
+  }
 }

@@ -13,7 +13,7 @@ export class UserController {
   @UseGuards(UserGuard)
   @Get('me')
   getMe(@GetUser() user: User) {
-    return user;
+    return this.service.getMe(user);
   }
 
   @UseGuards(FirebaseGuard)

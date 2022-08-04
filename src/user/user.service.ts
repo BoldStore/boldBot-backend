@@ -38,4 +38,16 @@ export class UserService {
     });
     return page;
   }
+
+  async getMe(user: User) {
+    const me = await this.prisma.user.findFirst({
+      where: {
+        id: user.id,
+      },
+      include: {
+        pages: true,
+      },
+    });
+    return me;
+  }
 }

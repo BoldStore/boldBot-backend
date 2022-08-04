@@ -19,6 +19,11 @@ export class WebhookService {
   ) {}
 
   verifyWebhook(challenge: string, mode: string, verifyToken: string) {
+    console.log('CONFIG>>>', this.config.get('WEBHOOK_VERIFY_TOKEN'));
+    console.log('\n\nMODE>>', mode);
+    console.log('\n\nVERIFY_TOKEN>>', verifyToken);
+    console.log('\n\nCHALLENGE>>', challenge);
+
     if (
       mode === 'subscribe' &&
       verifyToken === this.config.get('WEBHOOK_VERIFY_TOKEN')

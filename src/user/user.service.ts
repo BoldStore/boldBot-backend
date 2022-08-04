@@ -31,7 +31,7 @@ export class UserService {
     const page = await this.prisma.page.create({
       data: {
         userId: user.id,
-        page_access_token: dto.long_lived_token,
+        page_access_token: dto?.long_lived_token ?? dto?.access_token,
         page_id: data.id,
         page_name: data.name,
       },

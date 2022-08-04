@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class PageDto {
   @IsNotEmpty()
@@ -6,14 +6,14 @@ export class PageDto {
   access_token: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  data_access_expiration_time: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  expires_in: number;
+  @IsString()
+  data_access_expiration_time: string;
 
   @IsNotEmpty()
   @IsString()
-  long_lived_token: string;
+  expires_in: string;
+
+  @IsOptional()
+  @IsString()
+  long_lived_token?: string;
 }

@@ -13,6 +13,7 @@ export class RecieveService {
   ) {}
 
   handleMessage(user: UserDto, webhookEvent: WebhookType, page: Page) {
+    console.log('PAGE>>>', page);
     let responses: any;
     try {
       if (webhookEvent.message) {

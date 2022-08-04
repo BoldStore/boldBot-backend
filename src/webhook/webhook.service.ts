@@ -29,6 +29,7 @@ export class WebhookService {
   }
 
   async getWebhook(body: WebhookDto) {
+    console.log('GOT WEBHOOK', body);
     if (body.object === 'page') {
       throw new NotFoundException('Page webhook not implemented');
     }

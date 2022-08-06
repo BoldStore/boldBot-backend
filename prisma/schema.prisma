@@ -33,6 +33,7 @@ model Page {
   page_access_token String
   page_id           String @unique
   page_name         String
+  insta_id          String @unique @default("")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

@@ -54,22 +54,27 @@ export class WebhookService {
       for (let i = 0; i < entry.messaging.length; i++) {
         const webhookEvent = entry.messaging[i];
 
-        console.log('WEBHOOK EVENT>>>', webhookEvent);
-
         if ('message' in webhookEvent && webhookEvent?.message?.is_echo) {
           return;
         }
 
         const insta_id = webhookEvent?.sender?.id;
 
-        const userProfile = await this.graphService.getUserProfile(insta_id);
-
         const page_id = entry.id;
         const page = await this.prisma.page.findFirst({
-          where: { page_id: page_id },
+          where: { insta_id: page_id },
         });
 
-        this.recieveService.handleMessage(userProfile, webhookEvent, page);
+        const userProfile = await this.graphService.getUserProfile(
+          insta_id,
+          page.page_access_token,
+        );
+
+        await this.recieveService.handleMessage(
+          userProfile,
+          webhookEvent,
+          page,
+        );
       }
     }
 

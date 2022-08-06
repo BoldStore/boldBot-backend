@@ -39,12 +39,18 @@ export class UserService {
     try {
       const data = await this.graphService.getUserId(dto.access_token);
 
+      const insta_id = await this.graphService.getInstaId(
+        data.id,
+        dto?.access_token,
+      );
+
       const page = await this.prisma.page.create({
         data: {
           userId: user.id,
           page_access_token: dto?.long_lived_token ?? dto?.access_token,
           page_id: data.id,
           page_name: data.name,
+          insta_id: insta_id,
         },
       });
 

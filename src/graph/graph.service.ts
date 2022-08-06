@@ -8,12 +8,17 @@ import { MessageDto } from './dto';
 export class GraphService {
   async sendMessageApi(body: MessageDto, access_token: string) {
     try {
+      console.log('BODY>>', body);
       await axios.post(
         `${API_URL}/me/messages?access_token=${access_token}`,
         body,
       );
     } catch (e) {
-      throw new HttpException(e.response.data, e.response.status);
+      console.log(e?.response?.data ?? e);
+      throw new HttpException(
+        e?.response?.data ?? e ?? '',
+        e?.response?.status ?? 500,
+      );
     }
   }
 
@@ -28,12 +33,23 @@ export class GraphService {
     }
   }
 
-  async getUserProfile(insta_id: string) {
+  async getInstaId(pageId: string, access_token: string) {
+    try {
+      const response: AxiosResponse = await axios.get(
+        `${API_URL}/${pageId}?fields=instagram_business_account&access_token=${access_token}`,
+      );
+      return response?.data?.instagram_business_account;
+    } catch (e) {
+      throw new HttpException(e.response.data, e.response.status);
+    }
+  }
+
+  async getUserProfile(insta_id: string, access_token: string) {
     try {
       const url = `${API_URL}/${insta_id}`;
       const response = await axios.get(url, {
         params: {
-          access_token: '',
+          access_token: access_token,
           fields: 'name,profile_pic',
         },
       });

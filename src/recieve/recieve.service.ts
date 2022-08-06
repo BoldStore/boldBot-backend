@@ -12,7 +12,7 @@ export class RecieveService {
     private prisma: PrismaService,
   ) {}
 
-  handleMessage(user: UserDto, webhookEvent: WebhookType, page: Page) {
+  async handleMessage(user: UserDto, webhookEvent: WebhookType, page: Page) {
     console.log('PAGE>>>', page);
     let responses: any;
     try {
@@ -25,7 +25,7 @@ export class RecieveService {
         } else if (message.attachments) {
           responses = this.handleAttachmentMessage();
         } else if (message.text) {
-          responses = this.handleTextMessage(webhookEvent, page);
+          responses = await this.handleTextMessage(webhookEvent, page);
         }
       } else if (webhookEvent.postback) {
         responses = this.handlePostback(webhookEvent);
@@ -121,9 +121,9 @@ export class RecieveService {
         },
       });
 
-      if (message.texts.length > 0) {
+      if (message?.texts?.length > 0) {
         const arr = [];
-        message.texts.forEach((text) => {
+        message?.texts?.forEach((text) => {
           if (text.key !== 'fallback') {
             arr.push({
               text: text.value,

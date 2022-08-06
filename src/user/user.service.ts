@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FirebaseUser } from '@tfarras/nestjs-firebase-auth';
 import { User } from '@prisma/client';
@@ -36,17 +36,27 @@ export class UserService {
   }
 
   async addPage(user: User, dto: PageDto) {
-    const data = await this.graphService.getUserId(dto.access_token);
+    try {
+      const data = await this.graphService.getUserId(dto.access_token);
 
-    const page = await this.prisma.page.create({
-      data: {
-        userId: user.id,
-        page_access_token: dto?.long_lived_token ?? dto?.access_token,
-        page_id: data.id,
-        page_name: data.name,
-      },
-    });
-    return page;
+      const page = await this.prisma.page.create({
+        data: {
+          userId: user.id,
+          page_access_token: dto?.long_lived_token ?? dto?.access_token,
+          page_id: data.id,
+          page_name: data.name,
+        },
+      });
+
+      await this.graphService.setPageSubscription(data.id, dto.access_token);
+
+      return page;
+    } catch (e) {
+      throw new HttpException(
+        e?.response?.data ?? e,
+        e?.response?.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async getMe(user: User) {
@@ -59,5 +69,16 @@ export class UserService {
       },
     });
     return me;
+  }
+
+  async setSubscription(page_id: string, access_token: string) {
+    try {
+      await this.graphService.setPageSubscription(page_id, access_token);
+    } catch (e) {
+      throw new HttpException(
+        e?.response?.data ?? e,
+        e?.response?.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { FirebaseUser } from '@tfarras/nestjs-firebase-auth';
 import { GetUser } from 'src/auth/decorator';
@@ -26,5 +26,13 @@ export class UserController {
   @Post('page')
   addPage(@GetUser() user: User, @Body() dto: PageDto) {
     return this.service.addPage(user, dto);
+  }
+
+  @Get('subscription')
+  setSubscription(
+    @Query('page') page_id: string,
+    @Query('access_token') access_token: string,
+  ) {
+    return this.service.setSubscription(page_id, access_token);
   }
 }

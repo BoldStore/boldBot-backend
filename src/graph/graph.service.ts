@@ -96,23 +96,25 @@ export class GraphService {
     }
   }
 
-  async setPageSubscription() {
+  async setPageSubscription(pageId: string, access_token: string) {
     try {
-      const pageId = '';
-      const url = `${API_URL}/${pageId}/subscribed_apps`;
+      const url = `${API_URL}/${pageId}/subscribed_apps?subscribed_fields=feed&access_token=${access_token}`;
 
-      await axios.post(url, {
-        params: {
-          access_token: '',
-          subscribed_fields: 'feed',
-        },
+      const response = await axios.post(url, {
+        // params: {
+        //   access_token: access_token,
+        //   subscribed_fields: 'feed',
+        // },
       });
+
+      console.log(response.data);
 
       return {
         success: true,
         message: 'Page subscriptions have been set',
       };
     } catch (e) {
+      console.log(e?.response);
       throw new HttpException(e?.response?.data, e?.response?.status);
     }
   }

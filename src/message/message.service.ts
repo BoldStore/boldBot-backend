@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { TextDto } from './dto';
+import { IceBreakerDto, TextDto } from './dto';
 
 @Injectable()
 export class MessageService {
@@ -69,5 +69,54 @@ export class MessageService {
       },
     });
     return greetings;
+  }
+
+  async addIceBreaker(user: User, dto: IceBreakerDto) {
+    const ice_breakers = [];
+    await this.prisma.message.deleteMany({
+      where: {
+        userId: user.id,
+        pageId: dto.pageId,
+        type: 'ice-breaker',
+      },
+    });
+
+    for (let i = 0; i < dto?.ice_breakers?.length; i++) {
+      const item = dto.ice_breakers[i];
+      const ice_breaker = await this.prisma.message.create({
+        data: {
+          type: 'ice-breaker',
+          question: item.question,
+          pageId: dto.pageId,
+          userId: user.id,
+          texts: {
+            createMany: {
+              data: item.texts.map((text) => {
+                return {
+                  key: text.key,
+                  value: text.value,
+                };
+              }),
+            },
+          },
+        },
+      });
+      ice_breakers.push(ice_breaker);
+    }
+    return ice_breakers;
+  }
+
+  async getIceBreakers(user: User, page_id: string) {
+    const ice_breakers = await this.prisma.message.findMany({
+      where: {
+        userId: user.id,
+        pageId: page_id,
+        type: 'ice-breaker',
+      },
+      include: {
+        texts: true,
+      },
+    });
+    return ice_breakers;
   }
 }

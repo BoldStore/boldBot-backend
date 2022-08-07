@@ -38,26 +38,43 @@ export class UserService {
   async addPage(user: User, dto: PageDto) {
     try {
       const data = await this.graphService.getUserId(dto.access_token);
+      await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          facebook_id: data.id,
+        },
+      });
+
+      const insta_page = await this.graphService.getPageData(
+        data.id,
+        dto.access_token,
+      );
 
       const insta_id = await this.graphService.getInstaId(
-        data.id,
-        dto?.access_token,
+        insta_page.id,
+        insta_page?.access_token,
       );
 
       const page = await this.prisma.page.create({
         data: {
           userId: user.id,
-          page_access_token: dto?.long_lived_token ?? dto?.access_token,
-          page_id: data.id,
-          page_name: data.name,
-          insta_id: insta_id,
+          page_access_token: insta_page?.access_token,
+          page_id: insta_page.id,
+          page_name: insta_page.name,
+          insta_id: insta_id.id,
         },
       });
 
-      await this.graphService.setPageSubscription(data.id, dto.access_token);
+      await this.graphService.setPageSubscription(
+        data.id,
+        insta_page.access_token,
+      );
 
       return page;
     } catch (e) {
+      console.log('ERROR>>>>', e);
       throw new HttpException(
         e?.response?.data ?? e,
         e?.response?.status ?? HttpStatus.INTERNAL_SERVER_ERROR,

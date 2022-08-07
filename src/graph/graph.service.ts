@@ -33,6 +33,17 @@ export class GraphService {
     }
   }
 
+  async getPageData(user_id: string, access_token: string) {
+    try {
+      const response: AxiosResponse = await axios.get(
+        `${API_URL}/${user_id}/accounts?access_token=${access_token}`,
+      );
+      return response?.data?.data[0];
+    } catch (e) {
+      throw new HttpException(e?.response?.data, e?.response?.status);
+    }
+  }
+
   async getInstaId(pageId: string, access_token: string) {
     try {
       const response: AxiosResponse = await axios.get(
@@ -40,7 +51,8 @@ export class GraphService {
       );
       return response?.data?.instagram_business_account;
     } catch (e) {
-      throw new HttpException(e.response.data, e.response.status);
+      console.log('ERROR', e?.response?.data);
+      throw new HttpException(e?.response?.data, e?.response?.status);
     }
   }
 
@@ -130,8 +142,8 @@ export class GraphService {
         message: 'Page subscriptions have been set',
       };
     } catch (e) {
-      console.log(e?.response);
-      throw new HttpException(e?.response?.data, e?.response?.status);
+      console.log('ERROR SUBSCRIPTION>>', e?.response?.data);
+      // throw new HttpException(e?.response?.data, e?.response?.status);
     }
   }
 }

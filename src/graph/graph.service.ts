@@ -78,7 +78,7 @@ export class GraphService {
     }
   }
 
-  async setIceBreakers(iceBreakers: string[]) {
+  async setIceBreakers(iceBreakers: string[], access_token: string) {
     try {
       const url = `${API_URL}/me/messenger_profile`;
       const data = {
@@ -88,7 +88,7 @@ export class GraphService {
 
       await axios.post(url, data, {
         params: {
-          access_token: '',
+          access_token: access_token,
         },
       });
 

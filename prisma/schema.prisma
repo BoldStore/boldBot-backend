@@ -13,7 +13,7 @@ datasource db {
 model User {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
   email        String    @unique
-  facebook_id  String?    @unique
+  facebook_id  String?   @unique
   name         String?
   firebase_uid String    @unique
   profile_pic  String?

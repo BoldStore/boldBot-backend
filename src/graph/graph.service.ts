@@ -116,7 +116,7 @@ export class GraphService {
   async setPersistentMenu(
     persistentMenu: string[],
     access_token: string,
-    web_data: WebData,
+    web_data?: WebData,
   ) {
     try {
       const url = `${API_URL}/me/messenger_profile`;

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { IceBreakerDto, TextDto } from './dto';
+import { IceBreakerDto, PersistentMenuDto, TextDto } from './dto';
 
 @Injectable()
 export class MessageService {
@@ -133,5 +133,63 @@ export class MessageService {
       },
     });
     return ice_breakers;
+  }
+
+  async addPersistentMenu(user: User, dto: PersistentMenuDto) {
+    const menu = [];
+    const menu_list = [];
+    await this.prisma.message.deleteMany({
+      where: {
+        userId: user.id,
+        pageId: dto.pageId,
+        type: 'persistent-menu',
+      },
+    });
+
+    const page = await this.prisma.page.findFirst({
+      where: {
+        id: dto.pageId,
+      },
+    });
+
+    for (let i = 0; i < dto?.menu?.length; i++) {
+      const item = dto.menu[i];
+      const menu_item = await this.prisma.message.create({
+        data: {
+          type: 'persistent-menu',
+          pageId: dto.pageId,
+          userId: user.id,
+          texts: {
+            createMany: {
+              data: item.texts.map((text) => {
+                return {
+                  key: text.key,
+                  value: text.value,
+                };
+              }),
+            },
+          },
+        },
+      });
+      menu.push(menu_item);
+      menu_list.push(item?.texts[0]?.value);
+    }
+
+    await this.graphService.setPersistentMenu(menu, page.page_access_token);
+    return menu;
+  }
+
+  async getPersistentMenu(user: User, page_id: string) {
+    const menu = await this.prisma.message.findMany({
+      where: {
+        userId: user.id,
+        pageId: page_id,
+        type: 'persistent-menu',
+      },
+      include: {
+        texts: true,
+      },
+    });
+    return menu;
   }
 }

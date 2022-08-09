@@ -85,7 +85,7 @@ export class GraphService {
       const url = `${API_URL}/me/messenger_profile`;
       const data = {
         platform: 'instagram',
-        iceBreakers: iceBreakers.forEach((iceBreaker) => {
+        ice_breakers: iceBreakers.forEach((iceBreaker) => {
           return {
             call_to_actions: [
               {

@@ -1,6 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
+import { Message } from '@prisma/client';
 import axios, { AxiosResponse } from 'axios';
 import { API_URL } from 'src/constants';
+import { WebData } from 'src/message/dto';
 import { UserDto } from 'src/webhook/dto';
 import { MessageDto } from './dto';
 
@@ -78,12 +80,22 @@ export class GraphService {
     }
   }
 
-  async setIceBreakers(iceBreakers: string[], access_token: string) {
+  async setIceBreakers(iceBreakers: Message[], access_token: string) {
     try {
       const url = `${API_URL}/me/messenger_profile`;
       const data = {
         platform: 'instagram',
-        iceBreakers,
+        iceBreakers: iceBreakers.forEach((iceBreaker) => {
+          return {
+            call_to_actions: [
+              {
+                type: iceBreaker?.question,
+                payload: iceBreaker?.id,
+              },
+            ],
+            locale: 'default',
+          };
+        }),
       };
 
       await axios.post(url, data, {
@@ -101,17 +113,41 @@ export class GraphService {
     }
   }
 
-  async setPersistantMenu(persistentMenu: string[]) {
+  async setPersistentMenu(
+    persistentMenu: string[],
+    access_token: string,
+    web_data: WebData,
+  ) {
     try {
       const url = `${API_URL}/me/messenger_profile`;
       const data = {
-        platform: 'instagram',
-        persistentMenu,
+        persistentMenu: [
+          {
+            locale: 'default',
+            composer_input_disabled: false,
+            call_to_actions: [
+              ...persistentMenu.map((item) => {
+                return {
+                  type: 'postback',
+                  title: item,
+                  payload: 'text',
+                };
+              }),
+              web_data.url && {
+                type: 'web_url',
+                title: web_data.title,
+                url: web_data.url,
+                webview_height_ratio: 'full',
+              },
+            ],
+          },
+        ],
       };
 
       await axios.post(url, data, {
         params: {
-          access_token: '',
+          platform: 'instagram',
+          access_token,
         },
       });
 

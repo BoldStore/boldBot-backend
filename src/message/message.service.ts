@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { IceBreakerDto, TextDto } from './dto';
 
 @Injectable()
 export class MessageService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private graphService: GraphService,
+  ) {}
 
   async addGreeting(user: User, dto: TextDto) {
     // Find if greeting exists
@@ -81,6 +85,12 @@ export class MessageService {
       },
     });
 
+    const page = await this.prisma.page.findFirst({
+      where: {
+        id: dto.pageId,
+      },
+    });
+
     for (let i = 0; i < dto?.ice_breakers?.length; i++) {
       const item = dto.ice_breakers[i];
       const ice_breaker = await this.prisma.message.create({
@@ -103,6 +113,11 @@ export class MessageService {
       });
       ice_breakers.push(ice_breaker);
     }
+
+    await this.graphService.setIceBreakers(
+      ice_breakers,
+      page.page_access_token,
+    );
     return ice_breakers;
   }
 

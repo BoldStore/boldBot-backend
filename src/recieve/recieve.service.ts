@@ -33,10 +33,10 @@ export class RecieveService {
         responses = this.handleReferral(webhookEvent);
       }
     } catch (e) {
-      responses = {
-        text: `An error has occured: '${e}'. We have been notified and \
-        will fix the issue shortly!`,
-      };
+      // responses = {
+      //   text: `An error has occured: '${e}'. We have been notified and \
+      //   will fix the issue shortly!`,
+      // };
     }
 
     if (!responses) {

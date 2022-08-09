@@ -109,6 +109,7 @@ export class GraphService {
         message: 'Set up ice breakers',
       };
     } catch (e) {
+      console.log('SETTING UP ICE BREAKER ERROR: ', e?.response?.data ?? e);
       throw new HttpException(e?.response?.data, e?.response?.status);
     }
   }

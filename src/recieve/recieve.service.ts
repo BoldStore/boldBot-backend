@@ -143,21 +143,22 @@ export class RecieveService {
 
     // Fallback
     if (!response) {
-      const message = await this.prisma.message.findFirst({
-        where: {
-          type: 'greeting',
-          pageId: page.id,
-          texts: {
-            some: {
-              key: 'fallback',
-            },
-          },
-        },
-        include: {
-          texts: true,
-        },
-      });
-      response = message.texts[0].value;
+      // const message = await this.prisma.message.findFirst({
+      //   where: {
+      //     type: 'greeting',
+      //     pageId: page.id,
+      //     texts: {
+      //       some: {
+      //         key: 'fallback',
+      //       },
+      //     },
+      //   },
+      //   include: {
+      //     texts: true,
+      //   },
+      // });
+      // response = message.texts[0].value;
+      response = '';
     }
 
     return response;

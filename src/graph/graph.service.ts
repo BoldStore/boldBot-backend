@@ -81,11 +81,12 @@ export class GraphService {
   }
 
   async setIceBreakers(iceBreakers: Message[], access_token: string) {
+    console.log('breakers>>', iceBreakers);
     try {
       const url = `${API_URL}/me/messenger_profile`;
       const data = {
         platform: 'instagram',
-        ice_breakers: iceBreakers.forEach((iceBreaker) => {
+        ice_breakers: iceBreakers.map((iceBreaker) => {
           return {
             question: iceBreaker?.question,
             payload: iceBreaker?.id,
@@ -93,6 +94,7 @@ export class GraphService {
         }),
       };
 
+      console.log('DATA>>', data);
       await axios.post(url, data, {
         params: {
           access_token: access_token,

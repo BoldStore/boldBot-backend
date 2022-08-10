@@ -67,7 +67,7 @@ export class RecieveService {
     // Get message
     const message = await this.prisma.message.findFirst({
       where: {
-        type: 'persistent-menu',
+        type: webhookEvent.postback.payload,
         pageId: page.id,
         question: postback.title,
       },

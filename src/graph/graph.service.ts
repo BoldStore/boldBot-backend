@@ -89,7 +89,7 @@ export class GraphService {
         ice_breakers: iceBreakers.map((iceBreaker) => {
           return {
             question: iceBreaker?.question,
-            payload: iceBreaker?.id,
+            payload: 'ice-breaker',
           };
         }),
       };
@@ -122,7 +122,7 @@ export class GraphService {
         items.push({
           type: 'postback',
           title: item.toString(),
-          payload: 'text',
+          payload: 'persistent-menu',
         });
       });
 

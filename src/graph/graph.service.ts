@@ -120,20 +120,23 @@ export class GraphService {
     web_data?: WebData,
   ) {
     try {
+      const items = [];
+      persistentMenu.forEach((item) => {
+        items.push({
+          type: 'postback',
+          title: item.toString(),
+          payload: 'text',
+        });
+      });
+
       const url = `${API_URL}/me/messenger_profile`;
       const data = {
-        persistentMenu: [
+        persistent_menu: [
           {
             locale: 'default',
             composer_input_disabled: false,
             call_to_actions: [
-              ...persistentMenu.map((item) => {
-                return {
-                  type: 'postback',
-                  title: item,
-                  payload: 'text',
-                };
-              }),
+              ...items,
               {
                 type: 'web_url',
                 title: web_data.title,

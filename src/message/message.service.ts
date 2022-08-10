@@ -196,7 +196,7 @@ export class MessageService {
     }
 
     await this.graphService.setPersistentMenu(
-      menu,
+      menu_list,
       page.page_access_token,
       dto.web_data,
     );

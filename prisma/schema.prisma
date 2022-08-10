@@ -65,7 +65,7 @@ model Text {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  messageId String  @unique
+  messageId String
 
   key   String
   value String

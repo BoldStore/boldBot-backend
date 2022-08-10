@@ -134,7 +134,7 @@ export class GraphService {
                   payload: 'text',
                 };
               }),
-              web_data.url && {
+              {
                 type: 'web_url',
                 title: web_data.title,
                 url: web_data.url,
@@ -145,12 +145,10 @@ export class GraphService {
         ],
       };
 
-      await axios.post(url, data, {
-        params: {
-          platform: 'instagram',
-          access_token,
-        },
-      });
+      await axios.post(
+        url + `?platform=instagram&access_token=${access_token}`,
+        data,
+      );
 
       return {
         success: true,

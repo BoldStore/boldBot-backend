@@ -87,13 +87,8 @@ export class GraphService {
         platform: 'instagram',
         ice_breakers: iceBreakers.forEach((iceBreaker) => {
           return {
-            call_to_actions: [
-              {
-                type: iceBreaker?.question,
-                payload: iceBreaker?.id,
-              },
-            ],
-            locale: 'default',
+            question: iceBreaker?.question,
+            payload: iceBreaker?.id,
           };
         }),
       };

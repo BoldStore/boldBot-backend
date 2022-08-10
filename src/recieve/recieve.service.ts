@@ -28,7 +28,7 @@ export class RecieveService {
           responses = await this.handleTextMessage(webhookEvent, page);
         }
       } else if (webhookEvent.postback) {
-        responses = this.handlePostback(webhookEvent);
+        responses = await this.handlePostback(webhookEvent, page);
       } else if (webhookEvent.referral) {
         responses = this.handleReferral(webhookEvent);
       }
@@ -60,16 +60,28 @@ export class RecieveService {
     return this.handlePayload(payload);
   }
 
-  handlePostback(webhookEvent: WebhookType) {
+  async handlePostback(webhookEvent: WebhookType, page: Page) {
     const postback = webhookEvent.postback;
+    console.log('EVENT>>', webhookEvent);
 
-    let payload: string;
-    if (postback.referral && postback.referral.type == 'OPEN_THREAD') {
-      payload = postback.referral.ref;
-    } else {
-      payload = postback.payload;
-    }
-    return this.handlePayload(payload.toUpperCase());
+    // Get message
+    const message = await this.prisma.message.findFirst({
+      where: {
+        type: 'persistent-menu',
+        pageId: page.id,
+        question: postback.title,
+      },
+      include: {
+        texts: true,
+      },
+    });
+
+    const response = [];
+    message.texts.forEach((text) => {
+      response.push({ text: text.value });
+    });
+    console.log(response);
+    return response;
   }
 
   handleReferral(webhookEvent: WebhookType) {

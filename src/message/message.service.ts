@@ -159,6 +159,7 @@ export class MessageService {
           type: 'persistent-menu',
           pageId: dto.pageId,
           userId: user.id,
+          question: item.question,
           texts: {
             createMany: {
               data: item.texts.map((text) => {
@@ -172,10 +173,33 @@ export class MessageService {
         },
       });
       menu.push(menu_item);
-      menu_list.push(item?.texts[0]?.value);
+      menu_list.push(item?.question);
     }
 
-    await this.graphService.setPersistentMenu(menu, page.page_access_token);
+    if (dto.web_data) {
+      const web_data = await this.prisma.message.create({
+        data: {
+          type: 'persistent-menu',
+          pageId: dto.pageId,
+          userId: user.id,
+          texts: {
+            createMany: {
+              data: {
+                key: dto?.web_data?.title ?? '',
+                value: dto?.web_data?.url ?? '',
+              },
+            },
+          },
+        },
+      });
+      menu.push(web_data);
+    }
+
+    await this.graphService.setPersistentMenu(
+      menu,
+      page.page_access_token,
+      dto.web_data,
+    );
     return menu;
   }
 

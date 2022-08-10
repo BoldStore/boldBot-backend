@@ -157,6 +157,7 @@ export class GraphService {
         message: 'Set up persistant menu',
       };
     } catch (e) {
+      console.log('ERROR IN SETTING PERSISTENT MENU>>', e?.response?.data ?? e);
       throw new HttpException(e?.response?.data, e?.response?.status);
     }
   }

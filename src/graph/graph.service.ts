@@ -94,7 +94,6 @@ export class GraphService {
         }),
       };
 
-      console.log('DATA>>', data);
       await axios.post(url, data, {
         params: {
           access_token: access_token,

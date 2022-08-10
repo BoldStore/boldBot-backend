@@ -62,7 +62,6 @@ export class RecieveService {
 
   async handlePostback(webhookEvent: WebhookType, page: Page) {
     const postback = webhookEvent.postback;
-    console.log('EVENT>>', webhookEvent);
 
     // Get message
     const message = await this.prisma.message.findFirst({

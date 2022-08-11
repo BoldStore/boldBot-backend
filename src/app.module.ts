@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { MessageModule } from './message/message.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AppController } from './app/app.controller';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AppController } from './app/app.controller';
     UserModule,
     MessageModule,
     PrismaModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [],

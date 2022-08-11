@@ -23,8 +23,8 @@ model User {
 
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  Subscription Subscription?
-  Transaction  Transaction[]
+  subscription Subscription?
+  transactions Transaction[]
 
   @@map("users")
 }
@@ -85,25 +85,23 @@ model PricingPlan {
   price       Int
   description String
 
-  ice_breakers Int @default(0)
+  ice_breakers        Int @default(0)
   ice_breaker_replies Int @default(0)
 
-  persistent_messages    Int @default(0)
+  persistent_messages        Int @default(0)
   persistent_message_replies Int @default(0)
 
-  custom_texts       Int @default(0)
+  custom_texts        Int @default(0)
   custom_text_replies Int @default(0)
 
-  greetings   Int @default(0)
+  greetings Int @default(0)
 
-  period    String
-  interval  Int
+  days     Int
   currency String @default("INR")
 
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  Subscription Subscription[]
-  Transaction  Transaction[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  Transaction Transaction[]
 
   @@map("pricingPlans")
 }
@@ -111,19 +109,13 @@ model PricingPlan {
 model Subscription {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  plan   PricingPlan? @relation(fields: [planId], references: [id], onDelete: Cascade)
-  planId String
-
-  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique
 
-  startsAt  DateTime @default(now())
-  expiresAt DateTime
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  transactionId String      @unique
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("subscriptions")
+  status String @default("active")
 }
 
 model Transaction {
@@ -139,8 +131,12 @@ model Transaction {
 
   status String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  startsAt  DateTime @default(now())
+  expiresAt DateTime
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  Subscription Subscription?
 
   @@map("transactions")
 }

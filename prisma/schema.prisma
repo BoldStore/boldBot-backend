@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl"]
 }
 
@@ -21,8 +21,10 @@ model User {
   pages        Page[]
   messages     Message[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  Subscription Subscription?
+  Transaction  Transaction[]
 
   @@map("users")
 }
@@ -75,4 +77,70 @@ model Text {
   updatedAt DateTime @updatedAt
 
   @@map("texts")
+}
+
+model PricingPlan {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  price       Int
+  description String
+
+  ice_breakers Int @default(0)
+  ice_breaker_replies Int @default(0)
+
+  persistent_messages    Int @default(0)
+  persistent_message_replies Int @default(0)
+
+  custom_texts       Int @default(0)
+  custom_text_replies Int @default(0)
+
+  greetings   Int @default(0)
+
+  period    String
+  interval  Int
+  currency String @default("INR")
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Subscription Subscription[]
+  Transaction  Transaction[]
+
+  @@map("pricingPlans")
+}
+
+model Subscription {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  plan   PricingPlan? @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId String
+
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+
+  startsAt  DateTime @default(now())
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subscriptions")
+}
+
+model Transaction {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  plan     PricingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId   String
+  amount   Int
+  currency String
+
+  status String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("transactions")
 }

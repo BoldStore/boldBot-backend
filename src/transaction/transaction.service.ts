@@ -42,13 +42,18 @@ export class TransactionService {
 
     if (subscription) {
       // TODO: Calulate extra amount to pay
-      if (subscription.transaction.expiresAt > new Date()) {
+      if (subscription.expiresAt > new Date()) {
+        if (subscription.planId === 'planId') {
+          // TODO: Add a transaction for additional month
+          // TODO: Update subscription expiry date
+          return 'You have already subscribed to this plan';
+        }
         // TODO: Get number of days remaining
         const remainingDays = Math.round(
-          (subscription.transaction.expiresAt.getTime() -
-            new Date().getTime()) /
+          (subscription.expiresAt.getTime() - new Date().getTime()) /
             (1000 * 60 * 60 * 24),
         );
+        console.log(remainingDays);
       }
     }
 
@@ -62,10 +67,6 @@ export class TransactionService {
       data: {
         userId: user.id,
         amount: plan.price,
-        expiresAt: new Date(
-          new Date().setDate(new Date().getDate() + plan.days),
-        ),
-        startsAt: new Date(),
         planId: plan.id,
         status: 'pending',
         currency: plan.currency,

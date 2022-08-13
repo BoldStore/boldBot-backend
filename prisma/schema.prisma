@@ -21,10 +21,10 @@ model User {
   pages        Page[]
   messages     Message[]
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  subscription Subscription?
-  transactions Transaction[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+  transactions  Transaction[]
 
   @@map("users")
 }
@@ -79,29 +79,51 @@ model Text {
   @@map("texts")
 }
 
+model MessageType {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String @unique
+  description String
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  PlanTypeRelation PlanTypeRelation[]
+
+  @@map("message_types")
+}
+
+model PlanTypeRelation {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  message_type  MessageType @relation(fields: [messageTypeId], references: [id], onDelete: Cascade)
+  messageTypeId String      @map("message_type")
+
+  plan   PricingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId String      @map("plan")
+
+  number_of_replies     Int @default(0)
+  total_allowed_replies Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("plan_type_relations")
+}
+
 model PricingPlan {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   price       Int
   description String
 
-  ice_breakers        Int @default(0)
-  ice_breaker_replies Int @default(0)
-
-  persistent_messages        Int @default(0)
-  persistent_message_replies Int @default(0)
-
-  custom_texts        Int @default(0)
-  custom_text_replies Int @default(0)
-
-  greetings Int @default(0)
+  plan_type_relations PlanTypeRelation[]
 
   days     Int
   currency String @default("INR")
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  Transaction Transaction[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Transaction  Transaction[]
+  Subscription Subscription[]
 
   @@map("pricingPlans")
 }
@@ -110,10 +132,16 @@ model Subscription {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @unique
+  userId String
 
   transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   transactionId String      @unique
+
+  plan   PricingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId String
+
+  startsAt  DateTime @default(now())
+  expiresAt DateTime
 
   status String @default("active")
 }
@@ -129,10 +157,7 @@ model Transaction {
   amount   Int
   currency String
 
-  status String
-
-  startsAt  DateTime @default(now())
-  expiresAt DateTime
+  status String @default("pending")
 
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt

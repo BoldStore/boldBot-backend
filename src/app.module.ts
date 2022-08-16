@@ -9,6 +9,7 @@ import { MessageModule } from './message/message.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AppController } from './app/app.controller';
 import { TransactionModule } from './transaction/transaction.module';
+import { RazorpayModule } from 'nestjs-razorpay';
 
 @Module({
   imports: [
@@ -23,6 +24,10 @@ import { TransactionModule } from './transaction/transaction.module';
     MessageModule,
     PrismaModule,
     TransactionModule,
+    RazorpayModule.forRoot({
+      key_id: 'razorpay_key_id',
+      key_secret: 'razorpay_key_secret',
+    }),
   ],
   controllers: [AppController],
   providers: [],

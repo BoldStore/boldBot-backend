@@ -80,6 +80,7 @@ export class UserService {
           insta_id: insta_id.id,
           insta_profile_pic: insta_data.profilePic,
           facebook_profile_pic: page_pic,
+          insta_username: insta_data.username,
         },
       });
 

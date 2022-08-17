@@ -40,8 +40,6 @@ export class GraphService {
       const response: AxiosResponse = await axios.get(
         `${API_URL}/${page_id}/picture?redirect=0`,
       );
-
-      console.log(response.data.data);
       return response.data?.data?.url;
     } catch (e) {
       throw new HttpException(e?.response?.data, e?.response?.status);

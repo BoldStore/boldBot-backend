@@ -49,6 +49,7 @@ model Page {
   insta_id             String  @unique @default("")
   insta_profile_pic    String?
   facebook_profile_pic String?
+  insta_username       String? @unique
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

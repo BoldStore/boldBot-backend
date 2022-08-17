@@ -10,6 +10,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AppController } from './app/app.controller';
 import { TransactionModule } from './transaction/transaction.module';
 import { RazorpayModule } from 'nestjs-razorpay';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { RazorpayModule } from 'nestjs-razorpay';
       key_id: 'razorpay_key_id',
       key_secret: 'razorpay_key_secret',
     }),
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [],

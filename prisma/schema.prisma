@@ -11,6 +11,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Lead {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  insta_username String   @unique
+  createdAt      DateTime @default(now())
+
+  @@map("leads")
+}
+
 model User {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
   email        String    @unique

@@ -35,6 +35,19 @@ export class GraphService {
     }
   }
 
+  async getPagePic(page_id: string) {
+    try {
+      const response: AxiosResponse = await axios.get(
+        `${API_URL}/${page_id}/picture?redirect=0`,
+      );
+
+      console.log(response.data.data);
+      return response.data?.data?.url;
+    } catch (e) {
+      throw new HttpException(e?.response?.data, e?.response?.status);
+    }
+  }
+
   async getPageData(user_id: string, access_token: string) {
     try {
       const response: AxiosResponse = await axios.get(
@@ -64,13 +77,14 @@ export class GraphService {
       const response = await axios.get(url, {
         params: {
           access_token: access_token,
-          fields: 'name,profile_pic',
+          fields: 'name,username,profile_picture_url',
         },
       });
 
       const user: UserDto = {
         name: response?.data?.name,
-        profilePic: response?.data?.profile_pic,
+        profilePic: response?.data?.profile_picture_url,
+        username: response?.data?.username,
         insta_id,
       };
 

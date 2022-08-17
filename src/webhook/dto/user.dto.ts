@@ -9,6 +9,10 @@ export class UserDto {
   @IsString()
   profilePic?: string;
 
+  @IsOptional()
+  @IsString()
+  username?: string;
+
   @IsNotEmpty()
   @IsString()
   insta_id?: string;

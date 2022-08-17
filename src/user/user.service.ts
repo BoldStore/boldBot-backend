@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FirebaseUser } from '@tfarras/nestjs-firebase-auth';
 import { User } from '@prisma/client';
@@ -57,6 +62,15 @@ export class UserService {
         insta_page?.access_token,
       );
 
+      const insta_data = await this.graphService.getUserProfile(
+        insta_id.id,
+        insta_page.access_token,
+      );
+
+      const page_pic = await this.graphService.getPagePic(data.id);
+
+      // TODO: Save images to S3
+
       const page = await this.prisma.page.create({
         data: {
           userId: user.id,
@@ -64,6 +78,8 @@ export class UserService {
           page_id: insta_page.id,
           page_name: insta_page.name,
           insta_id: insta_id.id,
+          insta_profile_pic: insta_data.profilePic,
+          facebook_profile_pic: page_pic,
         },
       });
 
@@ -74,11 +90,14 @@ export class UserService {
 
       return page;
     } catch (e) {
-      console.log('ERROR>>>>', e);
-      throw new HttpException(
-        e?.response?.data ?? e,
-        e?.response?.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      if (e.code == 'P2002') {
+        throw new BadRequestException('You have added this page');
+      } else {
+        throw new HttpException(
+          e?.response?.data ?? e,
+          e?.response?.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 

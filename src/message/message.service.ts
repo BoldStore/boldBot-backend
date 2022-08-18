@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -12,53 +12,57 @@ export class MessageService {
   ) {}
 
   async addGreeting(user: User, dto: TextDto) {
-    // Find if greeting exists
-    const greeting = await this.prisma.message.findFirst({
-      where: {
-        userId: user.id,
-        pageId: dto.pageId,
-        type: 'greeting',
-      },
-    });
-
-    if (greeting) {
-      await this.prisma.text.deleteMany({
+    try {
+      // Find if greeting exists
+      const greeting = await this.prisma.message.findFirst({
         where: {
-          messageId: greeting.id,
+          userId: user.id,
+          pageId: dto.pageId,
+          type: 'greeting',
         },
       });
 
-      await this.prisma.text.createMany({
-        data: dto.texts.map((text) => {
-          return {
+      if (greeting) {
+        await this.prisma.text.deleteMany({
+          where: {
             messageId: greeting.id,
-            key: text.key,
-            value: text.value,
-          };
-        }),
-      });
+          },
+        });
 
-      return greeting;
-    }
+        await this.prisma.text.createMany({
+          data: dto.texts.map((text) => {
+            return {
+              messageId: greeting.id,
+              key: text.key,
+              value: text.value,
+            };
+          }),
+        });
 
-    const new_greeting = await this.prisma.message.create({
-      data: {
-        type: 'greeting',
-        pageId: dto.pageId,
-        userId: user.id,
-        texts: {
-          createMany: {
-            data: dto.texts.map((text) => {
-              return {
-                key: text.key,
-                value: text.value,
-              };
-            }),
+        return greeting;
+      }
+
+      const new_greeting = await this.prisma.message.create({
+        data: {
+          type: 'greeting',
+          pageId: dto.pageId,
+          userId: user.id,
+          texts: {
+            createMany: {
+              data: dto.texts.map((text) => {
+                return {
+                  key: text.key,
+                  value: text.value,
+                };
+              }),
+            },
           },
         },
-      },
-    });
-    return new_greeting;
+      });
+      return new_greeting;
+    } catch (e) {
+      throw new HttpException(e.message, 500);
+    }
   }
 
   async getGreetings(user: User, page_id: string) {
@@ -76,49 +80,53 @@ export class MessageService {
   }
 
   async addIceBreaker(user: User, dto: IceBreakerDto) {
-    const ice_breakers = [];
-    await this.prisma.message.deleteMany({
-      where: {
-        userId: user.id,
-        pageId: dto.pageId,
-        type: 'ice-breaker',
-      },
-    });
-
-    const page = await this.prisma.page.findFirst({
-      where: {
-        id: dto.pageId,
-      },
-    });
-
-    for (let i = 0; i < dto?.ice_breakers?.length; i++) {
-      const item = dto.ice_breakers[i];
-      const ice_breaker = await this.prisma.message.create({
-        data: {
-          type: 'ice-breaker',
-          question: item.question,
-          pageId: dto.pageId,
+    try {
+      const ice_breakers = [];
+      await this.prisma.message.deleteMany({
+        where: {
           userId: user.id,
-          texts: {
-            createMany: {
-              data: item.texts.map((text) => {
-                return {
-                  key: text.key,
-                  value: text.value,
-                };
-              }),
-            },
-          },
+          pageId: dto.pageId,
+          type: 'ice-breaker',
         },
       });
-      ice_breakers.push(ice_breaker);
-    }
 
-    await this.graphService.setIceBreakers(
-      ice_breakers,
-      page.page_access_token,
-    );
-    return ice_breakers;
+      const page = await this.prisma.page.findFirstOrThrow({
+        where: {
+          id: dto.pageId,
+        },
+      });
+
+      for (let i = 0; i < dto?.ice_breakers?.length; i++) {
+        const item = dto.ice_breakers[i];
+        const ice_breaker = await this.prisma.message.create({
+          data: {
+            type: 'ice-breaker',
+            question: item.question,
+            pageId: dto.pageId,
+            userId: user.id,
+            texts: {
+              createMany: {
+                data: item.texts.map((text) => {
+                  return {
+                    key: text.key,
+                    value: text.value,
+                  };
+                }),
+              },
+            },
+          },
+        });
+        ice_breakers.push(ice_breaker);
+      }
+
+      await this.graphService.setIceBreakers(
+        ice_breakers,
+        page.page_access_token,
+      );
+      return ice_breakers;
+    } catch (e) {
+      throw new HttpException(e.message, 500);
+    }
   }
 
   async getIceBreakers(user: User, page_id: string) {
@@ -136,71 +144,75 @@ export class MessageService {
   }
 
   async addPersistentMenu(user: User, dto: PersistentMenuDto) {
-    const menu = [];
-    const menu_list = [];
-    await this.prisma.message.deleteMany({
-      where: {
-        userId: user.id,
-        pageId: dto.pageId,
-        type: 'persistent-menu',
-      },
-    });
-
-    const page = await this.prisma.page.findFirst({
-      where: {
-        id: dto.pageId,
-      },
-    });
-
-    for (let i = 0; i < dto?.menu?.length; i++) {
-      const item = dto.menu[i];
-      const menu_item = await this.prisma.message.create({
-        data: {
-          type: 'persistent-menu',
-          pageId: dto.pageId,
+    try {
+      const menu = [];
+      const menu_list = [];
+      await this.prisma.message.deleteMany({
+        where: {
           userId: user.id,
-          question: item.question,
-          texts: {
-            createMany: {
-              data: item.texts.map((text) => {
-                return {
-                  key: text.key,
-                  value: text.value,
-                };
-              }),
-            },
-          },
+          pageId: dto.pageId,
+          type: 'persistent-menu',
         },
       });
-      menu.push(menu_item);
-      menu_list.push(item?.question);
-    }
 
-    if (dto.web_data) {
-      const web_data = await this.prisma.message.create({
-        data: {
-          type: 'persistent-menu',
-          pageId: dto.pageId,
-          userId: user.id,
-          texts: {
-            createMany: {
-              data: {
-                key: dto?.web_data?.title ?? '',
-                value: dto?.web_data?.url ?? '',
+      const page = await this.prisma.page.findFirstOrThrow({
+        where: {
+          id: dto.pageId,
+        },
+      });
+
+      for (let i = 0; i < dto?.menu?.length; i++) {
+        const item = dto.menu[i];
+        const menu_item = await this.prisma.message.create({
+          data: {
+            type: 'persistent-menu',
+            pageId: dto.pageId,
+            userId: user.id,
+            question: item.question,
+            texts: {
+              createMany: {
+                data: item.texts.map((text) => {
+                  return {
+                    key: text.key,
+                    value: text.value,
+                  };
+                }),
               },
             },
           },
-        },
-      });
-      menu.push(web_data);
-    }
+        });
+        menu.push(menu_item);
+        menu_list.push(item?.question);
+      }
 
-    await this.graphService.setPersistentMenu(
-      menu_list,
-      page.page_access_token,
-      dto.web_data,
-    );
-    return menu;
+      if (dto.web_data) {
+        const web_data = await this.prisma.message.create({
+          data: {
+            type: 'persistent-menu',
+            pageId: dto.pageId,
+            userId: user.id,
+            texts: {
+              createMany: {
+                data: {
+                  key: dto?.web_data?.title ?? '',
+                  value: dto?.web_data?.url ?? '',
+                },
+              },
+            },
+          },
+        });
+        menu.push(web_data);
+      }
+
+      await this.graphService.setPersistentMenu(
+        menu_list,
+        page?.page_access_token,
+        dto.web_data,
+      );
+      return menu;
+    } catch (e) {
+      throw new HttpException(e.message, 500);
+    }
   }
 
   async getPersistentMenu(user: User, page_id: string) {

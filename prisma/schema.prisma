@@ -11,6 +11,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
 model Lead {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   name           String
@@ -31,10 +37,10 @@ model User {
   pages    Page[]
   messages Message[]
 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  subscriptions Subscription[]
-  transactions  Transaction[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Transaction  Transaction[]
+  Subscription Subscription[]
 
   @@map("users")
 }
@@ -51,9 +57,11 @@ model Page {
   facebook_profile_pic String?
   insta_username       String? @unique
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  messages  Message[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  messages     Message[]
+  Transaction  Transaction[]
+  Subscription Subscription[]
 
   @@map("pages")
 }
@@ -92,89 +100,71 @@ model Text {
   @@map("texts")
 }
 
-model MessageType {
+model Services {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   name        String @unique
   description String
 
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  PlanTypeRelation PlanTypeRelation[]
-
-  @@map("message_types")
-}
-
-model PlanTypeRelation {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  message_type  MessageType @relation(fields: [messageTypeId], references: [id], onDelete: Cascade)
-  messageTypeId String      @map("message_type")
-
-  plan   PricingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
-  planId String      @map("plan")
-
-  number_of_replies     Int @default(0)
-  total_allowed_replies Int @default(0)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Plan      Plan?    @relation(fields: [planId], references: [id])
+  planId    String?  @db.ObjectId
 
-  @@map("plan_type_relations")
+  @@map("services")
 }
 
-model PricingPlan {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  price       Int
+model Plan {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String     @unique
   description String
-
-  plan_type_relations PlanTypeRelation[]
-
-  days     Int
-  currency String @default("INR")
+  price       Int
+  services    Services[]
 
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   Transaction  Transaction[]
   Subscription Subscription[]
 
-  @@map("pricingPlans")
-}
-
-model Subscription {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
-
-  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-  transactionId String      @unique
-
-  plan   PricingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
-  planId String
-
-  startsAt  DateTime @default(now())
-  expiresAt DateTime
-
-  status String @default("active")
+  @@map("plans")
 }
 
 model Transaction {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: SetNull)
   userId String
 
-  plan     PricingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
-  planId   String
-  amount   Int
-  currency String
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  pageId String
 
-  status String @default("pending")
+  plan   Plan              @relation(fields: [planId], references: [id], onDelete: SetNull)
+  planId String
+  amount Int
+  status TransactionStatus @default(PENDING)
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  Subscription Subscription?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("transactions")
+}
+
+model Subscription {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String
+
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  pageId String
+
+  transaction   Plan   @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  transactionId String
+
+  startsAt DateTime @default(now())
+  endsAt   DateTime
+
+  status TransactionStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subscriptions")
 }

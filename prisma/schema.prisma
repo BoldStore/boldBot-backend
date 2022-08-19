@@ -17,6 +17,11 @@ enum TransactionStatus {
   REJECTED
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model Lead {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   name           String
@@ -161,7 +166,7 @@ model Subscription {
   startsAt DateTime @default(now())
   endsAt   DateTime
 
-  status TransactionStatus @default(PENDING)
+  status SubscriptionStatus @default(ACTIVE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -20,6 +20,7 @@ enum TransactionStatus {
 enum SubscriptionStatus {
   ACTIVE
   INACTIVE
+  QUEUED
 }
 
 model Lead {
@@ -124,6 +125,7 @@ model Plan {
   description String
   price       Int
   services    Services[]
+  days        Int
 
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -163,8 +165,8 @@ model Subscription {
   transaction   Plan   @relation(fields: [transactionId], references: [id], onDelete: SetNull)
   transactionId String
 
-  startsAt DateTime @default(now())
-  endsAt   DateTime
+  startsAt DateTime?
+  endsAt   DateTime?
 
   status SubscriptionStatus @default(ACTIVE)
 

@@ -3,6 +3,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as admin from 'firebase-admin';
 
+declare global {
+  interface Date {
+    addDays(days: number): Date;
+  }
+}
+
+Date.prototype.addDays = function (days) {
+  const date = new Date(this.valueOf());
+  date.setDate(date.getDate() + days);
+  return date;
+};
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,

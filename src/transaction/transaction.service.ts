@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { HttpException, Injectable } from '@nestjs/common';
+import { SubscriptionStatus, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -58,31 +58,52 @@ export class TransactionService {
   }
 
   async verifyTransaction(transactionId: string): Promise<any> {
-    const transaction = await this.prisma.transaction.update({
-      where: {
-        id: transactionId,
-      },
-      data: {
-        status: 'CONFIRMED',
-      },
-    });
+    try {
+      // TODO: Integrate razorpay
+      const transaction = await this.prisma.transaction.update({
+        where: {
+          id: transactionId,
+        },
+        data: {
+          status: 'CONFIRMED',
+        },
+        include: {
+          plan: true,
+        },
+      });
 
-    // Add subscription to user
-    const subscription = await this.prisma.subscription.create({
-      data: {
-        userId: transaction.userId,
-        pageId: transaction.pageId,
-        startsAt: new Date(),
-        endsAt: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-        status: 'ACTIVE',
-        transactionId: transaction.id,
-      },
-    });
+      // If not - Create subscription
+      let status: SubscriptionStatus = 'ACTIVE';
 
-    // TODO: Check for errors
-    // TODO: Send email to user
-    // TODO: Check for subscription errors
+      // Check for subscription
+      const userSubscription = await this.prisma.subscription.findFirst({
+        where: {
+          userId: transaction.userId,
+          status: 'ACTIVE',
+        },
+      });
+      // If exists - Add to queue
+      if (userSubscription) {
+        status = 'QUEUED';
+      }
 
-    return transaction;
+      // Add subscription to user
+      const subscription = await this.prisma.subscription.create({
+        data: {
+          userId: transaction.userId,
+          pageId: transaction.pageId,
+          startsAt: status == 'ACTIVE' ? new Date() : null,
+          endsAt: new Date(new Date().addDays(transaction.plan.days)),
+          status,
+          transactionId: transaction.id,
+        },
+      });
+
+      // TODO: Send email to user
+
+      return subscription;
+    } catch (e) {
+      throw new HttpException(e, 500);
+    }
   }
 }

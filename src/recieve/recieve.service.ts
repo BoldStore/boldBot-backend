@@ -7,7 +7,6 @@ import { UserDto, WebhookType } from 'src/webhook/dto';
 
 // TODO: Check for plan/subscription
 // TODO: Check if limit reached
-// TODO: Add to count
 
 @Injectable()
 export class RecieveService {

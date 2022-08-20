@@ -24,78 +24,65 @@ export class TransactionService {
   }
 
   async getPlans(): Promise<any> {
-    const plans = await this.prisma.pricingPlan.findMany();
+    const plans = await this.prisma.plan.findMany();
     return plans;
   }
 
   async buyPlan(user: User): Promise<any> {
-    // TODO: Get plan id
-    const subscription = await this.prisma.subscription.findFirst({
+    // Check if user has a page
+    const page = await this.prisma.page.findFirstOrThrow({
       where: {
         userId: user.id,
-        status: 'active',
-      },
-      include: {
-        transaction: true,
       },
     });
 
-    if (subscription) {
-      // TODO: Calulate extra amount to pay
-      if (subscription.expiresAt > new Date()) {
-        if (subscription.planId === 'planId') {
-          // TODO: Add a transaction for additional month
-          // TODO: Update subscription expiry date
-          return 'You have already subscribed to this plan';
-        }
-        // TODO: Get number of days remaining
-        const remainingDays = Math.round(
-          (subscription.expiresAt.getTime() - new Date().getTime()) /
-            (1000 * 60 * 60 * 24),
-        );
-        console.log(remainingDays);
-      }
-    }
-
-    const plan = await this.prisma.pricingPlan.findFirst({
+    // TODO: get plan Id
+    const plan = await this.prisma.plan.findFirstOrThrow({
       where: {
-        id: 'planId',
+        name: 'Basic',
       },
     });
 
+    // Create transaction
     const transaction = await this.prisma.transaction.create({
       data: {
         userId: user.id,
-        amount: plan.price,
         planId: plan.id,
-        status: 'pending',
-        currency: plan.currency,
+        amount: plan.price,
+        status: 'PENDING',
+        pageId: page.id,
       },
     });
-
-    // Add to razorpay
 
     return transaction;
   }
 
   async verifyTransaction(transactionId: string): Promise<any> {
-    const transaction = await this.prisma.transaction.findFirstOrThrow({
+    const transaction = await this.prisma.transaction.update({
       where: {
         id: transactionId,
-        status: 'pending',
-      },
-    });
-
-    // TODO: Verify transaction with razorpay
-    const updated_transaction = await this.prisma.transaction.update({
-      where: {
-        id: transaction.id,
       },
       data: {
-        status: 'confirmed',
+        status: 'CONFIRMED',
       },
     });
 
-    return updated_transaction;
+    // Add subscription to user
+    const subscription = await this.prisma.subscription.create({
+      data: {
+        userId: transaction.userId,
+        pageId: transaction.pageId,
+        startsAt: new Date(),
+        endsAt: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+        status: 'ACTIVE',
+        transactionId: transaction.id,
+      },
+    });
+
+    // TODO: Check for errors
+    // TODO: Send email to user
+    // TODO: Check for subscription errors
+
+    return transaction;
   }
 }

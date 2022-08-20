@@ -1,9 +1,10 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Page } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'src/services/response';
 import { UserDto, WebhookType } from 'src/webhook/dto';
+import { RecieveHelpers } from './recieve.helpers';
 
 // TODO: Check for plan/subscription
 // TODO: Check if limit reached
@@ -13,6 +14,7 @@ export class RecieveService {
   constructor(
     private graphService: GraphService,
     private prisma: PrismaService,
+    private helper: RecieveHelpers,
   ) {}
 
   async handleMessage(user: UserDto, webhookEvent: WebhookType, page: Page) {
@@ -79,7 +81,7 @@ export class RecieveService {
     });
 
     // Add count
-    await this.addCount(page.userId, webhookEvent.postback.payload);
+    await this.helper.addCount(page.userId, webhookEvent.postback.payload);
 
     const response = [];
     message.texts.forEach((text) => {
@@ -139,7 +141,7 @@ export class RecieveService {
       });
 
       // Add count
-      await this.addCount(page.userId, 'greeting');
+      await this.helper.addCount(page.userId, 'greeting');
 
       if (message?.texts?.length > 0) {
         const arr = [];
@@ -241,82 +243,5 @@ export class RecieveService {
     };
 
     return this.graphService.sendMessageApi(body, access_token);
-  }
-
-  async addCount(userId: string, message_type: string) {
-    try {
-      const service = await this.prisma.services.findFirst({
-        where: {
-          name: message_type,
-        },
-      });
-
-      const stats = await this.prisma.stats.findFirst({
-        where: {
-          userId: userId,
-        },
-      });
-
-      if (stats) {
-        const relation = await this.prisma.serviceAmountRelation.findFirst({
-          where: {
-            serviceId: service.id,
-            statsId: stats.id,
-          },
-        });
-
-        if (relation) {
-          // Update stat count
-          await this.prisma.serviceAmountRelation.update({
-            where: {
-              id: relation.id,
-            },
-            data: {
-              amount: { increment: 1 },
-              serviceId: service.id,
-              statsId: stats.id,
-            },
-          });
-        } else {
-          // Create stat count
-          await this.prisma.serviceAmountRelation.create({
-            data: {
-              amount: 1,
-              serviceId: service.id,
-              statsId: stats.id,
-            },
-          });
-        }
-      } else {
-        // Get page
-        const page = await this.prisma.page.findFirst({
-          where: {
-            userId: userId,
-          },
-        });
-        // Create stat
-        const stat = await this.prisma.stats.create({
-          data: {
-            userId: userId,
-            pageId: page.id,
-          },
-        });
-
-        // Create stat count
-        await this.prisma.serviceAmountRelation.create({
-          data: {
-            amount: 1,
-            serviceId: service.id,
-            statsId: stat.id,
-          },
-        });
-      }
-
-      return {
-        message: 'ok',
-      };
-    } catch (e) {
-      throw new HttpException(e.message, 500);
-    }
   }
 }

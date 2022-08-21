@@ -58,13 +58,13 @@ export class UserService {
       );
 
       const insta_id = await this.graphService.getInstaId(
-        insta_page.id,
+        insta_page?.id,
         insta_page?.access_token,
       );
 
       const insta_data = await this.graphService.getUserProfile(
-        insta_id.id,
-        insta_page.access_token,
+        insta_id?.id,
+        insta_page?.access_token,
       );
 
       const page_pic = await this.graphService.getPagePic(data.id);

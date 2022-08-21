@@ -62,33 +62,43 @@ export class GraphService {
       const response: AxiosResponse = await axios.get(
         `${API_URL}/${pageId}?fields=instagram_business_account&access_token=${access_token}`,
       );
-      return response?.data?.instagram_business_account;
+      return response?.data?.instagram_business_account ?? response?.data;
     } catch (e) {
       console.log('ERROR', e?.response?.data);
       throw new HttpException(e?.response?.data, e?.response?.status);
     }
   }
 
-  async getUserProfile(insta_id: string, access_token: string) {
+  async getUserProfile(insta_id: string, access_token: string, pic = false) {
     try {
+      let fields = 'name,username,profile_picture_url';
+      if (pic) {
+        fields = 'name,username,picture';
+      }
       const url = `${API_URL}/${insta_id}`;
       const response = await axios.get(url, {
         params: {
           access_token: access_token,
-          fields: 'name,username,profile_picture_url',
+          fields: fields,
         },
       });
 
       const user: UserDto = {
         name: response?.data?.name,
-        profilePic: response?.data?.profile_picture_url,
+        profilePic:
+          response?.data?.profile_picture_url ??
+          response?.data?.picture?.data?.url,
         username: response?.data?.username,
         insta_id,
       };
 
       return user;
     } catch (e) {
-      throw new HttpException(e?.response?.data, e?.response?.status);
+      if (e.response.data.error.code === 100) {
+        return await this.getUserProfile(insta_id, access_token, true);
+      } else {
+        throw new HttpException(e?.response?.data, e?.response?.status);
+      }
     }
   }
 

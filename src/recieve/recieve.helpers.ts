@@ -1,6 +1,12 @@
 import { HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+// TODO: Change model for stats
+// Basically validateLimit function refactor
+// Also update addCount
+// Should be simple now and we can check what message was sent when
+// Ref: https://www.prisma.io/docs/concepts/components/prisma-client/aggregation-grouping-summarizing#count
+
 export class RecieveHelpers {
   constructor(private prisma: PrismaService) {}
 
@@ -87,7 +93,7 @@ export class RecieveHelpers {
           // Create relation
           await this.prisma.serviceAmountRelation.create({
             data: {
-              replies: 1,
+              replies: 0,
               serviceId: service.id,
               statsId: stats.id,
             },
@@ -106,7 +112,7 @@ export class RecieveHelpers {
         // Also, create the relation for above mentioned reason
         await this.prisma.serviceAmountRelation.create({
           data: {
-            replies: 1,
+            replies: 0,
             serviceId: service.id,
             statsId: stat.id,
           },

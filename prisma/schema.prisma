@@ -48,6 +48,7 @@ model User {
   updatedAt    DateTime       @updatedAt
   Transaction  Transaction[]
   Subscription Subscription[]
+  MessageCount MessageCount[]
 
   @@map("users")
 }
@@ -85,6 +86,7 @@ model Page {
   Transaction  Transaction[]
   Subscription Subscription[]
   Stats        Stats[]
+  MessageCount MessageCount[]
 
   @@map("pages")
 }
@@ -131,6 +133,7 @@ model Services {
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   ServiceAmountRelation ServiceAmountRelation[]
+  MessageCount          MessageCount[]
 
   @@map("services")
 }
@@ -208,4 +211,20 @@ model Subscription {
   updatedAt DateTime @updatedAt
 
   @@map("subscriptions")
+}
+
+model MessageCount {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String
+
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  pageId String
+
+  service   Services? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  serviceId String
+
+  createdAt DateTime @default(now())
+
+  @@map("message_count")
 }

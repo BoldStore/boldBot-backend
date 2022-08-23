@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { Page } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -129,6 +129,15 @@ export class RecieveService {
 
     // Greeting
     if (greetings.some((greeting) => message.includes(greeting))) {
+      const isAvailable = await this.helper.validateLimit(
+        page.userId,
+        'greeting',
+      );
+
+      if (!isAvailable) {
+        throw new HttpException('Limit Reached', 400);
+        // TODO: Add to failed
+      }
       // Get greeting
       const message = await this.prisma.message.findFirst({
         where: {

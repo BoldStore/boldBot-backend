@@ -4,21 +4,25 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class RecieveHelpers {
   constructor(private prisma: PrismaService) {}
 
+  // Basically validates if person has exhausted the quota
   async validateLimit(userId: string, message_type: string) {
     try {
+      // To check which service the user is requesting
       const service = await this.prisma.services.findFirstOrThrow({
         where: {
           name: message_type,
         },
       });
 
-      // Get page
+      // Get page of the user
+      // which is requesting the service
       const page = await this.prisma.page.findFirstOrThrow({
         where: {
           userId: userId,
         },
       });
 
+      // Check for active subscription
       const subscription = await this.prisma.subscription.findFirstOrThrow({
         where: {
           userId: userId,
@@ -27,12 +31,17 @@ export class RecieveHelpers {
         },
       });
 
+      // Get transaction to get the plan ID
+      // Why PlanID?
+      // To get the limit available to the user
       const transaction = await this.prisma.transaction.findFirstOrThrow({
         where: {
           id: subscription.transactionId,
         },
       });
 
+      // To check for the realtion of service the
+      // user is requesting
       const service_amount_relation =
         await this.prisma.serviceAmountRelation.findFirstOrThrow({
           where: {
@@ -41,7 +50,10 @@ export class RecieveHelpers {
           },
         });
 
-      const stats = await this.prisma.stats.findFirstOrThrow({
+      // Get the user stats
+      // To check the amount
+      // user has used
+      const stats = await this.prisma.stats.findFirst({
         where: {
           userId: userId,
           pageId: page.id,
@@ -49,6 +61,11 @@ export class RecieveHelpers {
       });
 
       if (stats) {
+        // Why Relation?
+        // relation is the amount
+        // of services used for a page
+        // Basically this is what is inside
+        // of stats
         const relation = await this.prisma.serviceAmountRelation.findFirst({
           where: {
             serviceId: service.id,
@@ -56,15 +73,21 @@ export class RecieveHelpers {
           },
         });
 
+        // If relation exists,
+        // check for the limit
         if (relation) {
-          if (relation.amount >= service_amount_relation.amount) {
+          if (relation.amount >= service_amount_relation.replies) {
             throw new HttpException('Limit exceeded', 500);
           }
-        } else {
+        }
+        // If first time,
+        // Create the realtion and increase the replies
+        // count
+        else {
           // Create relation
           await this.prisma.serviceAmountRelation.create({
             data: {
-              amount: 0,
+              replies: 1,
               serviceId: service.id,
               statsId: stats.id,
             },
@@ -72,14 +95,26 @@ export class RecieveHelpers {
         }
       } else {
         // Create stat
-        await this.prisma.stats.create({
+        // If it doesn't exist to store the relation
+        const stat = await this.prisma.stats.create({
           data: {
             userId: userId,
             pageId: page.id,
           },
         });
+
+        // Also, create the relation for above mentioned reason
+        await this.prisma.serviceAmountRelation.create({
+          data: {
+            replies: 1,
+            serviceId: service.id,
+            statsId: stat.id,
+          },
+        });
       }
 
+      // This means all is good
+      // Limit not exceeded
       return true;
     } catch (e) {
       throw new HttpException(e.message, 500);

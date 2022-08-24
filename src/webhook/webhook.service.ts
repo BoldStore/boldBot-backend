@@ -53,8 +53,15 @@ export class WebhookService {
 
       for (let i = 0; i < entry.messaging.length; i++) {
         const webhookEvent = entry.messaging[i];
+        console.log('EVENT>>', webhookEvent);
 
+        // Eliminate echoes
         if ('message' in webhookEvent && webhookEvent?.message?.is_echo) {
+          return;
+        }
+
+        // Eliminate read webhooks
+        if ('read' in webhookEvent) {
           return;
         }
 

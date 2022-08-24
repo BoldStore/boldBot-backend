@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Page } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,6 +8,8 @@ import { RecieveHelpers } from './recieve.helpers';
 
 // TODO: Check for plan/subscription
 // TODO: Check if limit reached
+// TODO: Create customer profile
+// Connect to user
 
 @Injectable()
 export class RecieveService {
@@ -48,14 +50,15 @@ export class RecieveService {
       return;
     }
 
+    // TODO: Handle unsend
     if (Array.isArray(responses)) {
       let delay = 0;
       for (const response of responses) {
-        this.sendMessage(response, user.insta_id, page, delay * 1500);
+        this.sendMessage(response, user?.insta_id, page, delay * 1500);
         delay++;
       }
     } else {
-      this.sendMessage(responses, user.insta_id, page);
+      this.sendMessage(responses, user?.insta_id, page);
     }
   }
 
@@ -87,7 +90,6 @@ export class RecieveService {
     message.texts.forEach((text) => {
       response.push({ text: text.value });
     });
-    console.log(response);
     return response;
   }
 
@@ -126,18 +128,17 @@ export class RecieveService {
       'start over',
       'get started',
     ];
-
     // Greeting
     if (greetings.some((greeting) => message.includes(greeting))) {
-      const isAvailable = await this.helper.validateLimit(
-        page.userId,
-        'greeting',
-      );
+      // const isAvailable = await this.helper.validateLimit(
+      //   page.userId,
+      //   'greeting',
+      // );
 
-      if (!isAvailable) {
-        throw new HttpException('Limit Reached', 400);
-        // TODO: Add to failed
-      }
+      // if (!isAvailable) {
+      //   throw new HttpException('Limit Reached', 400);
+      //   // TODO: Add to failed
+      // }
       // Get greeting
       const message = await this.prisma.message.findFirst({
         where: {
@@ -150,7 +151,7 @@ export class RecieveService {
       });
 
       // Add count
-      await this.helper.addCount(page.userId, 'greeting');
+      // await this.helper.addCount(page.userId, 'greeting');
 
       if (message?.texts?.length > 0) {
         const arr = [];

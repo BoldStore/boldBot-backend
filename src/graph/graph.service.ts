@@ -69,11 +69,21 @@ export class GraphService {
     }
   }
 
-  async getUserProfile(insta_id: string, access_token: string, pic = false) {
+  async getUserProfile(insta_id: string, access_token: string, pic = 0) {
     try {
-      let fields = 'name,username,profile_picture_url';
-      if (pic) {
-        fields = 'name,username,picture';
+      let fields = 'name,username';
+      switch (pic) {
+        case 0:
+          fields = 'name,username,profile_pic';
+          break;
+        case 1:
+          fields = 'name,username,profile_picture_url';
+          break;
+        case 2:
+          fields = 'name,username,picture';
+          break;
+        default:
+          fields = 'name,username';
       }
       const url = `${API_URL}/${insta_id}`;
       const response = await axios.get(url, {
@@ -94,8 +104,9 @@ export class GraphService {
 
       return user;
     } catch (e) {
-      if (e.response.data.error.code === 100) {
-        return await this.getUserProfile(insta_id, access_token, true);
+      if (e.response.data.error.code === 100 && pic < 3) {
+        const picNumber = pic + 1;
+        return await this.getUserProfile(insta_id, access_token, picNumber);
       } else {
         throw new HttpException(e?.response?.data, e?.response?.status);
       }

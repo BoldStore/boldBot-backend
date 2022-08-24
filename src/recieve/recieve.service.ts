@@ -189,8 +189,15 @@ export class RecieveService {
       await this.helper.addCount(page.userId, 'story-reply');
     }
 
+    // To handle exclamations and words
+    message.replace('!', ' ');
+    const message_split = message.split(' ');
+
     // Greeting
-    if (!response && greetings.some((greeting) => message.includes(greeting))) {
+    if (
+      !response &&
+      greetings.some((greeting) => message_split.includes(greeting))
+    ) {
       // const isAvailable = await this.helper.validateLimit(
       //   page.userId,
       //   'greeting',

@@ -1,5 +1,7 @@
-import { HttpException } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+
+@Injectable()
 export class RecieveHelpers {
   constructor(private prisma: PrismaService) {}
 
@@ -220,6 +222,7 @@ export class RecieveHelpers {
         count: messageCount,
       };
     } catch (e) {
+      console.log('ERROR while counting>>>', e);
       throw new HttpException(e.message, 500);
     }
   }

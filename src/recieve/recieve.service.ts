@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { Page } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -69,28 +69,33 @@ export class RecieveService {
   }
 
   async handlePostback(webhookEvent: WebhookType, page: Page) {
-    const postback = webhookEvent.postback;
+    try {
+      const postback = webhookEvent.postback;
 
-    // Get message
-    const message = await this.prisma.message.findFirst({
-      where: {
-        type: webhookEvent.postback.payload,
-        pageId: page.id,
-        question: postback.title,
-      },
-      include: {
-        texts: true,
-      },
-    });
+      // Get message
+      const message = await this.prisma.message.findFirst({
+        where: {
+          type: webhookEvent.postback.payload,
+          pageId: page.id,
+          question: postback.title,
+        },
+        include: {
+          texts: true,
+        },
+      });
 
-    // Add count
-    await this.helper.addCount(page.userId, webhookEvent.postback.payload);
+      // Add count
+      await this.helper.addCount(page.userId, webhookEvent.postback.payload);
 
-    const response = [];
-    message.texts.forEach((text) => {
-      response.push({ text: text.value });
-    });
-    return response;
+      const response = [];
+      message.texts.forEach((text) => {
+        response.push({ text: text.value });
+      });
+      return response;
+    } catch (e) {
+      console.log('ERROR>>>', e);
+      throw new HttpException('There was an error', 500);
+    }
   }
 
   handleReferral(webhookEvent: WebhookType) {
@@ -151,7 +156,7 @@ export class RecieveService {
       });
 
       // Add count
-      // await this.helper.addCount(page.userId, 'greeting');
+      await this.helper.addCount(page.userId, 'greeting');
 
       if (message?.texts?.length > 0) {
         const arr = [];

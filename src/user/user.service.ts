@@ -43,14 +43,6 @@ export class UserService {
   async addPage(user: User, dto: PageDto) {
     try {
       const data = await this.graphService.getUserId(dto.access_token);
-      await this.prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          facebook_id: data.id,
-        },
-      });
 
       const insta_page = await this.graphService.getPageData(
         data.id,
@@ -71,6 +63,18 @@ export class UserService {
 
       // TODO: Save images to S3
 
+      // Check if page already exists
+      const page_found = await this.prisma.page.findFirst({
+        where: {
+          insta_id: insta_id.id,
+          userId: user.id,
+        },
+      });
+
+      if (page_found) {
+        return page_found;
+      }
+
       const page = await this.prisma.page.create({
         data: {
           userId: user.id,
@@ -84,15 +88,18 @@ export class UserService {
         },
       });
 
-      await this.graphService.setPageSubscription(
-        data.id,
-        insta_page.access_token,
-      );
+      // await this.graphService.setPageSubscription(
+      //   data.id,
+      //   insta_page.access_token,
+      // );
 
       return page;
     } catch (e) {
       if (e.code == 'P2002') {
-        throw new BadRequestException('You have added this page');
+        throw new BadRequestException(
+          'Failed to add page - This page already exists',
+          e,
+        );
       } else {
         throw new HttpException(
           e?.response?.data ?? e,

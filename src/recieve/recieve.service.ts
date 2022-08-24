@@ -30,7 +30,7 @@ export class RecieveService {
         } else if (message.quick_reply) {
           responses = this.handleQuickReply(webhookEvent);
         } else if (message.attachments) {
-          responses = this.handleAttachmentMessage();
+          responses = this.handleAttachmentMessage(webhookEvent);
         } else if (message.text) {
           responses = await this.handleTextMessage(webhookEvent, page);
         }
@@ -104,8 +104,23 @@ export class RecieveService {
     return this.handlePayload(payload);
   }
 
-  handleAttachmentMessage() {
-    const response = Response.genQuickReply('fallback.attachment', [
+  handleAttachmentMessage(webhookEvent: WebhookType) {
+    const attachment = webhookEvent.message.attachments;
+    let response: any;
+
+    // Story mentions
+    if (attachment.length > 0 && attachment[0].type == 'story_mention') {
+      const arr = [];
+      // message?.texts?.forEach((text) => {
+      //   if (text.key !== 'fallback') {
+      //     arr.push({
+      //       text: text.value,
+      //     });
+      //   }
+      // });
+      response = arr;
+    }
+    response = Response.genQuickReply('fallback.attachment', [
       {
         title: 'menu.help',
         payload: 'CARE_HELP',
@@ -133,6 +148,14 @@ export class RecieveService {
       'start over',
       'get started',
     ];
+
+    // Handle story reply
+    if (webhookEvent?.message?.reply_to?.story) {
+      // TODO: Add to db
+      // Check if matches
+      // gen response
+    }
+
     // Greeting
     if (greetings.some((greeting) => message.includes(greeting))) {
       // const isAvailable = await this.helper.validateLimit(

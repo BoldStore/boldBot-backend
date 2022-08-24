@@ -2,7 +2,13 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { IceBreakerDto, PersistentMenuDto, TextDto } from './dto';
+import {
+  IceBreakerDto,
+  PersistentMenuDto,
+  StoryMentionDto,
+  StoryReplyDto,
+  TextDto,
+} from './dto';
 
 @Injectable()
 export class MessageService {
@@ -227,5 +233,124 @@ export class MessageService {
       },
     });
     return menu;
+  }
+
+  async addStoryReply(user: User, dto: StoryReplyDto) {
+    try {
+      const replies = [];
+      await this.prisma.message.deleteMany({
+        where: {
+          userId: user.id,
+          pageId: dto.pageId,
+          type: 'story-reply',
+        },
+      });
+
+      // TODO: Handle security - only allow person page things to set
+
+      const page = await this.prisma.page.findFirstOrThrow({
+        where: {
+          id: dto.pageId,
+          userId: user.id,
+        },
+      });
+
+      for (let i = 0; i < dto?.replies?.length; i++) {
+        const item = dto.replies[i];
+        const reply_item = await this.prisma.message.create({
+          data: {
+            type: 'story-reply',
+            pageId: page.id,
+            userId: user.id,
+            question: item.question,
+            texts: {
+              createMany: {
+                data: item.texts.map((text) => {
+                  return {
+                    key: text.key,
+                    value: text.value,
+                  };
+                }),
+              },
+            },
+          },
+        });
+        replies.push(reply_item);
+      }
+      return replies;
+    } catch (e) {
+      throw new HttpException(e.message, 500);
+    }
+  }
+
+  async getStoryReplies(user: User, page_id: string) {
+    const replies = await this.prisma.message.findMany({
+      where: {
+        userId: user.id,
+        pageId: page_id,
+        type: 'story-reply',
+      },
+      include: {
+        texts: true,
+      },
+    });
+    return replies;
+  }
+
+  async addStoryMention(user: User, dto: StoryMentionDto) {
+    try {
+      await this.prisma.message.deleteMany({
+        where: {
+          userId: user.id,
+          pageId: dto.pageId,
+          type: 'story-mention',
+        },
+      });
+
+      // TODO: Handle security - only allow person page things to set
+
+      const page = await this.prisma.page.findFirstOrThrow({
+        where: {
+          id: dto.pageId,
+          userId: user.id,
+        },
+      });
+
+      const reply_item = await this.prisma.message.create({
+        data: {
+          type: 'story-mention',
+          pageId: page.id,
+          userId: user.id,
+          texts: {
+            createMany: {
+              data: dto.texts.map((text) => {
+                return {
+                  key: text.key,
+                  value: text.value,
+                };
+              }),
+            },
+          },
+        },
+      });
+
+      return reply_item;
+    } catch (e) {
+      throw new HttpException(e.message, 500);
+    }
+  }
+
+  async getStoryMentions(user: User, page_id: string) {
+    const replies = await this.prisma.message.findMany({
+      where: {
+        userId: user.id,
+        pageId: page_id,
+        type: 'story-mention',
+      },
+      include: {
+        texts: true,
+      },
+    });
+    return replies;
   }
 }

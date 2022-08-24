@@ -22,9 +22,9 @@ export class RecieveService {
   async handleMessage(user: UserDto, webhookEvent: WebhookType, page: Page) {
     console.log('PAGE>>>', page);
     let responses: any;
+    const message = webhookEvent.message;
     try {
       if (webhookEvent.message) {
-        const message = webhookEvent.message;
         if (message.is_echo) {
           return;
         } else if (message.quick_reply) {
@@ -50,7 +50,6 @@ export class RecieveService {
       return;
     }
 
-    // TODO: Handle unsend
     if (Array.isArray(responses)) {
       let delay = 0;
       for (const response of responses) {

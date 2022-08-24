@@ -53,7 +53,7 @@ export class MessageController {
 
   @Get('story-reply')
   getStoryReplies(@GetUser() user: User, @Query('page') page_id: string) {
-    return this.messageService.getStoryMentions(user, page_id);
+    return this.messageService.getStoryReplies(user, page_id);
   }
 
   @Post('story-mention')

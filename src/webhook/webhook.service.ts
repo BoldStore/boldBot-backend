@@ -72,10 +72,14 @@ export class WebhookService {
           where: { insta_id: page_id },
         });
 
+        console.log('PG>>', page);
+
         const userProfile = await this.graphService.getUserProfile(
           insta_id,
           page.page_access_token,
         );
+
+        console.log('PROFILE>>>', userProfile);
 
         await this.recieveService.handleMessage(
           userProfile,

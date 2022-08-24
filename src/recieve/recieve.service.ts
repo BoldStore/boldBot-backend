@@ -30,7 +30,7 @@ export class RecieveService {
         } else if (message.quick_reply) {
           responses = this.handleQuickReply(webhookEvent);
         } else if (message.attachments) {
-          responses = this.handleAttachmentMessage(webhookEvent);
+          responses = await this.handleAttachmentMessage(webhookEvent, page);
         } else if (message.text) {
           responses = await this.handleTextMessage(webhookEvent, page);
         }
@@ -104,33 +104,40 @@ export class RecieveService {
     return this.handlePayload(payload);
   }
 
-  handleAttachmentMessage(webhookEvent: WebhookType) {
+  async handleAttachmentMessage(webhookEvent: WebhookType, page: Page) {
     const attachment = webhookEvent.message.attachments;
     let response: any;
 
     // Story mentions
     if (attachment.length > 0 && attachment[0].type == 'story_mention') {
-      const arr = [];
-      // message?.texts?.forEach((text) => {
-      //   if (text.key !== 'fallback') {
-      //     arr.push({
-      //       text: text.value,
-      //     });
-      //   }
-      // });
-      response = arr;
-    }
-    response = Response.genQuickReply('fallback.attachment', [
-      {
-        title: 'menu.help',
-        payload: 'CARE_HELP',
-      },
-      {
-        title: 'menu.start_over',
-        payload: 'GET_STARTED',
-      },
-    ]);
+      const reply = await this.prisma.message.findFirst({
+        where: {
+          userId: page.userId,
+          pageId: page.id,
+          type: 'story-mention',
+        },
+        include: {
+          texts: true,
+        },
+      });
 
+      if (reply?.texts?.length > 0) {
+        const arr = [];
+        reply?.texts?.forEach((text) => {
+          if (text.key !== 'fallback') {
+            arr.push({
+              text: text.value,
+            });
+          }
+        });
+        response = arr;
+      } else {
+        response = reply.texts[0].value;
+      }
+
+      // Add count
+      await this.helper.addCount(page.userId, 'story-reply');
+    }
     return response;
   }
 
@@ -151,13 +158,40 @@ export class RecieveService {
 
     // Handle story reply
     if (webhookEvent?.message?.reply_to?.story) {
-      // TODO: Add to db
-      // Check if matches
-      // gen response
+      const replyText = webhookEvent.message.text;
+
+      const reply = await this.prisma.message.findFirst({
+        where: {
+          userId: page.userId,
+          pageId: page.id,
+          question: replyText,
+          type: 'story-reply',
+        },
+        include: {
+          texts: true,
+        },
+      });
+
+      if (reply?.texts?.length > 0) {
+        const arr = [];
+        reply?.texts?.forEach((text) => {
+          if (text.key !== 'fallback') {
+            arr.push({
+              text: text.value,
+            });
+          }
+        });
+        response = arr;
+      } else {
+        response = reply.texts[0].value;
+      }
+
+      // Add count
+      await this.helper.addCount(page.userId, 'story-reply');
     }
 
     // Greeting
-    if (greetings.some((greeting) => message.includes(greeting))) {
+    if (!response && greetings.some((greeting) => message.includes(greeting))) {
       // const isAvailable = await this.helper.validateLimit(
       //   page.userId,
       //   'greeting',
@@ -197,7 +231,7 @@ export class RecieveService {
     }
 
     // Help
-    if (message.includes('help')) {
+    if (!response && message.includes('help')) {
       response = '';
     }
 

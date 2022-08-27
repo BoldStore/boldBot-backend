@@ -67,7 +67,7 @@ export class MessageService {
       });
       return new_greeting;
     } catch (e) {
-      throw new HttpException(e.message, 500);
+      throw new HttpException('Could not add greetings', 500);
     }
   }
 
@@ -104,6 +104,7 @@ export class MessageService {
 
       for (let i = 0; i < dto?.ice_breakers?.length; i++) {
         const item = dto.ice_breakers[i];
+        if (!item.question) continue;
         const ice_breaker = await this.prisma.message.create({
           data: {
             type: 'ice-breaker',
@@ -131,7 +132,7 @@ export class MessageService {
       );
       return ice_breakers;
     } catch (e) {
-      throw new HttpException(e.message, 500);
+      throw new HttpException('Could not add ice-breakers', 500);
     }
   }
 
@@ -169,6 +170,9 @@ export class MessageService {
 
       for (let i = 0; i < dto?.menu?.length; i++) {
         const item = dto.menu[i];
+        if (!item.question) {
+          continue;
+        }
         const menu_item = await this.prisma.message.create({
           data: {
             type: 'persistent-menu',

@@ -114,16 +114,16 @@ export class GraphService {
   }
 
   async setIceBreakers(iceBreakers: Message[], access_token: string) {
-    console.log('breakers>>', iceBreakers);
     try {
       const url = `${API_URL}/me/messenger_profile`;
       const data = {
         platform: 'instagram',
         ice_breakers: iceBreakers.map((iceBreaker) => {
-          return {
-            question: iceBreaker?.question,
-            payload: 'ice-breaker',
-          };
+          if (iceBreaker.question)
+            return {
+              question: iceBreaker?.question,
+              payload: 'ice-breaker',
+            };
         }),
       };
 
@@ -151,31 +151,46 @@ export class GraphService {
     try {
       const items = [];
       persistentMenu.forEach((item) => {
-        items.push({
-          type: 'postback',
-          title: item.toString(),
-          payload: 'persistent-menu',
-        });
+        if (item)
+          items.push({
+            type: 'postback',
+            title: item.toString(),
+            payload: 'persistent-menu',
+          });
       });
 
       const url = `${API_URL}/me/messenger_profile`;
-      const data = {
-        persistent_menu: [
-          {
-            locale: 'default',
-            composer_input_disabled: false,
-            call_to_actions: [
-              ...items,
-              {
-                type: 'web_url',
-                title: web_data.title,
-                url: web_data.url,
-                webview_height_ratio: 'full',
-              },
-            ],
-          },
-        ],
-      };
+      let data = null;
+
+      if (web_data && web_data?.title) {
+        data = {
+          persistent_menu: [
+            {
+              locale: 'default',
+              composer_input_disabled: false,
+              call_to_actions: [
+                ...items,
+                {
+                  type: 'web_url',
+                  title: web_data?.title,
+                  url: web_data?.url,
+                  webview_height_ratio: 'full',
+                },
+              ],
+            },
+          ],
+        };
+      } else {
+        data = {
+          persistent_menu: [
+            {
+              locale: 'default',
+              composer_input_disabled: false,
+              call_to_actions: items,
+            },
+          ],
+        };
+      }
 
       await axios.post(
         url + `?platform=instagram&access_token=${access_token}`,

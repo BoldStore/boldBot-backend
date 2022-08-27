@@ -153,6 +153,8 @@ export class RecieveHelpers {
       // TODO: Now we dont need stats we can directly
       // add a message - simpler and more elegant
 
+      // TODO: Add customer
+
       const messageCount = await this.prisma.messageCount.create({
         data: {
           pageId: page.id,

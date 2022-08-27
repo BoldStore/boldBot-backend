@@ -78,7 +78,7 @@ export class WebhookService {
         );
 
         // Unsend webhooks
-        if (webhookEvent.message.is_deleted) {
+        if (webhookEvent?.message?.is_deleted) {
           this.recieveService.sendMessage(
             { text: 'Sorry to see that you deleted your message' },
             userProfile?.insta_id,

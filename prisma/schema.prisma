@@ -225,8 +225,8 @@ model MessageCount {
   service   Services? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   serviceId String
 
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  customerId String
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId String?
 
   createdAt DateTime @default(now())
 

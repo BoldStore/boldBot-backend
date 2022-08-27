@@ -49,6 +49,7 @@ model User {
   Transaction  Transaction[]
   Subscription Subscription[]
   MessageCount MessageCount[]
+  CustomerUser CustomerUser[]
 
   @@map("users")
 }
@@ -224,7 +225,39 @@ model MessageCount {
   service   Services? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   serviceId String
 
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId String
+
   createdAt DateTime @default(now())
 
   @@map("message_count")
+}
+
+model Customer {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  username String @unique
+  insta_id String @unique
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  MessageCount MessageCount[]
+  CustomerUser CustomerUser[]
+
+  @@map("customers")
+}
+
+model CustomerUser {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String
+
+  customer   Customer @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("customer_user_relations")
 }

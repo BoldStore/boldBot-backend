@@ -23,16 +23,16 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Make envfile
-        uses: SpicyPizza/create-envfile@v1.3
-        with:
-          envkey_DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          envkey_FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
-          envkey_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          envkey_FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-          envkey_JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          envkey_WEBHOOK_VERIFY_TOKEN: ${{ secrets.WEBHOOK_VERIFY_TOKEN }}
-          file_name: .env
-          fail_on_empty: false
+        run: |
+          touch .env
+          echo envkey_DATABASE_URL=${{ secrets.envkey_DATABASE_URL }} >> .env
+          echo FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }} >> .env
+          echo FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} >> .env
+          echo FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }} >> .env
+          echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
+          echo WEBHOOK_VERIFY_TOKEN=${{ secrets.WEBHOOK_VERIFY_TOKEN }} >> .env
+          cat .env
+
       - name: Generate prisma Client
         run: npx prisma generate
       - name: Build nest app
@@ -42,4 +42,4 @@ jobs:
     runs-on: self-hosted
     needs: build
     steps:
-      - run: sudo pm2 restart boldbot
+      - run: pm2 restart boldbot

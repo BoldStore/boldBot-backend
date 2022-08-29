@@ -35,8 +35,6 @@ jobs:
         fail_on_empty: false
       - name: Generate prisma Client
         run: npx prisma generate
-      - name: Run prisma studio
-        run: npx prisma studio
       - name: Build nest app
         run: yarn build
 

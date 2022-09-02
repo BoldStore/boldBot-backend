@@ -22,8 +22,6 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install
-      - name: Remove env
-        run: rm .env
       - name: Make envfile
         run: |
           touch .env

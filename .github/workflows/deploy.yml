@@ -22,9 +22,10 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install
+      - name: Remove env
+        run: rm .env
       - name: Make envfile
         run: |
-          rm .env
           touch .env
           echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
           echo FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }} >> .env

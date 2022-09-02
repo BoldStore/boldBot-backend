@@ -24,6 +24,7 @@ jobs:
         run: yarn install
       - name: Make envfile
         run: |
+          rm .env
           touch .env
           echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
           echo FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }} >> .env

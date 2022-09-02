@@ -30,7 +30,6 @@
     "@nestjs/jwt": "^9.0.0",
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
-    "@prisma/client": "^4.2.1",
     "@tfarras/nestjs-firebase-admin": "^2.0.1",
     "@tfarras/nestjs-firebase-auth": "^2.0.0",
     "axios": "^0.27.2",

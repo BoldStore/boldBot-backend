@@ -162,6 +162,8 @@ export class GraphService {
       const url = `${API_URL}/me/messenger_profile`;
       let data = null;
 
+      if (items.length < 0) return;
+
       if (web_data && web_data?.title) {
         data = {
           persistent_menu: [
@@ -203,7 +205,11 @@ export class GraphService {
       };
     } catch (e) {
       console.log('ERROR IN SETTING PERSISTENT MENU>>', e?.response?.data ?? e);
-      throw new HttpException(e?.response?.data, e?.response?.status);
+      if (e?.response?.data?.error?.code == 100) {
+        throw new HttpException('Link should be a URL', e?.response?.status);
+      } else {
+        throw new HttpException('Something went wrong', e?.response?.status);
+      }
     }
   }
 

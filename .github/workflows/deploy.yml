@@ -42,4 +42,4 @@ jobs:
     runs-on: self-hosted
     needs: build
     steps:
-      - run: pm2 restart boldbot
+      - run: pm2 restart boldbot --update-env

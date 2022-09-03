@@ -11,6 +11,7 @@ import { AppController } from './app/app.controller';
 import { TransactionModule } from './transaction/transaction.module';
 import { RazorpayModule } from 'nestjs-razorpay';
 import { ContactModule } from './contact/contact.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ContactModule } from './contact/contact.module';
       key_secret: 'razorpay_key_secret',
     }),
     ContactModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -44,22 +44,31 @@ export class UserService {
     try {
       const data = await this.graphService.getUserId(dto.access_token);
 
+      console.log('DATA>>>', data);
+
       const insta_page = await this.graphService.getPageData(
         data.id,
         dto.access_token,
       );
+
+      console.log('INSTA_PAGE>>>', insta_page);
 
       const insta_id = await this.graphService.getInstaId(
         insta_page?.id,
         insta_page?.access_token,
       );
 
+      console.log('ID>>>', insta_id);
+
       const insta_data = await this.graphService.getUserProfile(
         insta_id?.id,
         insta_page?.access_token,
       );
 
+      console.log('INSTA_DATA>>>', insta_data);
+
       const page_pic = await this.graphService.getPagePic(data.id);
+      console.log('PAGE_PIC>>', page_pic);
 
       // TODO: Save images to S3
 
@@ -70,6 +79,8 @@ export class UserService {
           userId: user.id,
         },
       });
+
+      console.log('PAGE_FOUND>>>', page_found);
 
       if (page_found) {
         return page_found;
@@ -101,6 +112,7 @@ export class UserService {
           e,
         );
       } else {
+        console.log('There was an error>>', e?.response?.data ?? e);
         throw new HttpException(
           e?.response?.data ?? e,
           e?.response?.status ?? HttpStatus.INTERNAL_SERVER_ERROR,

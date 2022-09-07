@@ -106,13 +106,16 @@ export class UserService {
 
       return page;
     } catch (e) {
-      if (e.code == 'P2002') {
+      console.log(
+        'There was an error adding the page>>',
+        e?.response?.data ?? e,
+      );
+      if (e?.code == 'P2002') {
         throw new BadRequestException(
           'Failed to add page - This page already exists',
           e,
         );
       } else {
-        console.log('There was an error>>', e?.response?.data ?? e);
         throw new HttpException(
           e?.response?.data ?? e,
           e?.response?.status ?? HttpStatus.INTERNAL_SERVER_ERROR,

@@ -62,6 +62,7 @@ export class GraphService {
       const response: AxiosResponse = await axios.get(
         `${API_URL}/${pageId}?fields=instagram_business_account&access_token=${access_token}`,
       );
+      console.log('GET INSTA ID RES>>', response.data);
       return response?.data?.instagram_business_account ?? response?.data;
     } catch (e) {
       console.log('ERROR', e?.response?.data);

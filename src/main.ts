@@ -2,8 +2,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as admin from 'firebase-admin';
-import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import * as winston from 'winston';
+import {
+  utilities as nestWinstonModuleUtilities,
+  WinstonModule,
+  WINSTON_MODULE_NEST_PROVIDER,
+} from 'nest-winston';
 
 declare global {
   interface Date {
@@ -25,7 +29,16 @@ async function bootstrap() {
       level: 'info',
       format: winston.format.json(),
       transports: [
-        new winston.transports.Console(),
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.ms(),
+            nestWinstonModuleUtilities.format.nestLike('BOLDbot', {
+              prettyPrint: true,
+              colors: true,
+            }),
+          ),
+        }),
         new winston.transports.File({ filename: 'logfile.log' }),
       ],
     }),

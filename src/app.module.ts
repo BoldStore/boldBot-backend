@@ -18,6 +18,14 @@ import { TransactionModule } from './transaction/transaction.module';
 import { RazorpayModule } from 'nestjs-razorpay';
 import { ContactModule } from './contact/contact.module';
 import { StatsModule } from './stats/stats.module';
+import { transports } from './transports';
+
+const papertrail = new winston.transports.Http({
+  host: 'logs.collector.solarwinds.com',
+  path: '/v1/log',
+  auth: { username: '', password: 'TOKEN' },
+  ssl: true,
+});
 
 @Module({
   imports: [
@@ -38,18 +46,27 @@ import { StatsModule } from './stats/stats.module';
     }),
     WinstonModule.forRoot({
       level: 'info',
-      format: winston.format.json(),
-      transports: [
-        new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.ms(),
-            nestWinstonModuleUtilities.format.nestLike('BOLDbot', {
-              prettyPrint: true,
-              colors: true,
-            }),
-          ),
+      format: winston.format.combine(
+        winston.format.timestamp({
+          format: 'YYYY-MM-DD HH:mm:ss',
         }),
+        winston.format.errors({ stack: true }),
+        winston.format.splat(),
+        winston.format.json(),
+      ),
+      transports: [
+        transports.console,
+        papertrail,
+        // new winston.transports.Console({
+        //   format: winston.format.combine(
+        //     winston.format.timestamp(),
+        //     winston.format.ms(),
+        //     nestWinstonModuleUtilities.format.nestLike('BOLDbot', {
+        //       prettyPrint: true,
+        //       colors: true,
+        //     }),
+        //   ),
+        // }),
         new winston.transports.File({ filename: 'logfile.log' }),
       ],
     }),

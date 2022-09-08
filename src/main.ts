@@ -8,6 +8,7 @@ import {
   WinstonModule,
   WINSTON_MODULE_NEST_PROVIDER,
 } from 'nest-winston';
+import { transports } from './transports';
 
 declare global {
   interface Date {
@@ -24,21 +25,18 @@ Date.prototype.addDays = function (days) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,
-    // logger: ['error', 'warn', 'log'],
     logger: WinstonModule.createLogger({
       level: 'info',
-      format: winston.format.json(),
-      transports: [
-        new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.ms(),
-            nestWinstonModuleUtilities.format.nestLike('BOLDbot', {
-              prettyPrint: true,
-              colors: true,
-            }),
-          ),
+      format: winston.format.combine(
+        winston.format.timestamp({
+          format: 'YYYY-MM-DD HH:mm:ss',
         }),
+        winston.format.errors({ stack: true }),
+        winston.format.splat(),
+        winston.format.json(),
+      ),
+      transports: [
+        transports.console,
         new winston.transports.File({ filename: 'logfile.log' }),
       ],
     }),

@@ -1,5 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import {
+  utilities as nestWinstonModuleUtilities,
+  WinstonModule,
+} from 'nest-winston';
+import * as winston from 'winston';
+
 import { WebhookModule } from './webhook/webhook.module';
 import { RecieveModule } from './recieve/recieve.module';
 import { GraphModule } from './graph/graph.module';
@@ -30,10 +36,27 @@ import { StatsModule } from './stats/stats.module';
       key_id: 'razorpay_key_id',
       key_secret: 'razorpay_key_secret',
     }),
+    WinstonModule.forRoot({
+      level: 'info',
+      format: winston.format.json(),
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.ms(),
+            nestWinstonModuleUtilities.format.nestLike('BOLDbot', {
+              prettyPrint: true,
+              colors: true,
+            }),
+          ),
+        }),
+        new winston.transports.File({ filename: 'logfile.log' }),
+      ],
+    }),
     ContactModule,
     StatsModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [Logger],
 })
 export class AppModule {}

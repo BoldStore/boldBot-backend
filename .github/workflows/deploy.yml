@@ -32,6 +32,8 @@ jobs:
           echo FIREBASE_PRIVATE_KEY=\"${{ secrets.FIREBASE_PRIVATE_KEY }}\" >> .env
           echo JWT_SECRET=\"${{ secrets.JWT_SECRET }}\" >> .env
           echo WEBHOOK_VERIFY_TOKEN=\"${{ secrets.WEBHOOK_VERIFY_TOKEN }}\" >> .env
+          echo PAPERTRAIL_USER=\"${{ secrets.PAPERTRAIL_USER }}\" >> .env
+          echo PAPERTRAIL_TOKEN=\"${{ secrets.PAPERTRAIL_TOKEN }}\" >> .env
           cat .env
 
       - name: Generate prisma Client

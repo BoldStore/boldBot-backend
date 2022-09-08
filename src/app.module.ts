@@ -1,7 +1,7 @@
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import {
-  utilities as nestWinstonModuleUtilities,
+  // utilities as nestWinstonModuleUtilities,
   WinstonModule,
 } from 'nest-winston';
 import * as winston from 'winston';
@@ -23,7 +23,10 @@ import { transports } from './transports';
 const papertrail = new winston.transports.Http({
   host: 'logs.collector.solarwinds.com',
   path: '/v1/log',
-  auth: { username: '', password: 'TOKEN' },
+  auth: {
+    username: process.env.PAPERTRAIL_USER,
+    password: process.env.PAPERTRAIL_TOKEN,
+  },
   ssl: true,
 });
 

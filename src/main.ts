@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import * as admin from 'firebase-admin';
 import * as winston from 'winston';
 import {
-  utilities as nestWinstonModuleUtilities,
+  // utilities as nestWinstonModuleUtilities,
   WinstonModule,
   WINSTON_MODULE_NEST_PROVIDER,
 } from 'nest-winston';

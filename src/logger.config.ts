@@ -12,7 +12,7 @@ export const papertrail = new winston.transports.Http({
 });
 
 export const config = {
-  level: 'info',
+  level: 'silly',
   format: winston.format.combine(
     winston.format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss',

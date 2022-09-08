@@ -1,11 +1,6 @@
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import {
-  // utilities as nestWinstonModuleUtilities,
-  WinstonModule,
-} from 'nest-winston';
-import * as winston from 'winston';
-
+import { WinstonModule } from 'nest-winston';
 import { WebhookModule } from './webhook/webhook.module';
 import { RecieveModule } from './recieve/recieve.module';
 import { GraphModule } from './graph/graph.module';
@@ -18,17 +13,7 @@ import { TransactionModule } from './transaction/transaction.module';
 import { RazorpayModule } from 'nestjs-razorpay';
 import { ContactModule } from './contact/contact.module';
 import { StatsModule } from './stats/stats.module';
-import { transports } from './transports';
-
-const papertrail = new winston.transports.Http({
-  host: 'logs.collector.solarwinds.com',
-  path: '/v1/log',
-  auth: {
-    username: process.env.PAPERTRAIL_USER,
-    password: process.env.PAPERTRAIL_TOKEN,
-  },
-  ssl: true,
-});
+import { config } from './logger.config';
 
 @Module({
   imports: [
@@ -47,32 +32,7 @@ const papertrail = new winston.transports.Http({
       key_id: 'razorpay_key_id',
       key_secret: 'razorpay_key_secret',
     }),
-    WinstonModule.forRoot({
-      level: 'info',
-      format: winston.format.combine(
-        winston.format.timestamp({
-          format: 'YYYY-MM-DD HH:mm:ss',
-        }),
-        winston.format.errors({ stack: true }),
-        winston.format.splat(),
-        winston.format.json(),
-      ),
-      transports: [
-        transports.console,
-        papertrail,
-        // new winston.transports.Console({
-        //   format: winston.format.combine(
-        //     winston.format.timestamp(),
-        //     winston.format.ms(),
-        //     nestWinstonModuleUtilities.format.nestLike('BOLDbot', {
-        //       prettyPrint: true,
-        //       colors: true,
-        //     }),
-        //   ),
-        // }),
-        new winston.transports.File({ filename: 'logfile.log' }),
-      ],
-    }),
+    WinstonModule.forRoot(config),
     ContactModule,
     StatsModule,
   ],

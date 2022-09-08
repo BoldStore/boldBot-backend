@@ -1,8 +1,9 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class RecieveHelpers {
+  private readonly logger = new Logger(RecieveHelpers.name);
   constructor(private prisma: PrismaService) {}
 
   // Basically validates if person has exhausted the quota
@@ -224,7 +225,7 @@ export class RecieveHelpers {
         count: messageCount,
       };
     } catch (e) {
-      console.log('ERROR while counting>>>', e);
+      this.logger.debug('ERROR while counting>>>', e);
       throw new HttpException(e.message, 500);
     }
   }

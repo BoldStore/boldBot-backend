@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FirebaseUser } from '@tfarras/nestjs-firebase-auth';
@@ -12,6 +13,7 @@ import { GraphService } from 'src/graph/graph.service';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
   constructor(
     private prisma: PrismaService,
     private graphService: GraphService,
@@ -44,31 +46,31 @@ export class UserService {
     try {
       const data = await this.graphService.getUserId(dto.access_token);
 
-      console.log('DATA>>>', data);
+      this.logger.debug('DATA>>>', data);
 
       const insta_page = await this.graphService.getPageData(
         data.id,
         dto.access_token,
       );
 
-      console.log('INSTA_PAGE>>>', insta_page);
+      this.logger.debug('INSTA_PAGE>>>', insta_page);
 
       const insta_id = await this.graphService.getInstaId(
         insta_page?.id,
         insta_page?.access_token,
       );
 
-      console.log('ID>>>', insta_id);
+      this.logger.debug('ID>>>', insta_id);
 
       const insta_data = await this.graphService.getUserProfile(
         insta_id?.id,
         insta_page?.access_token,
       );
 
-      console.log('INSTA_DATA>>>', insta_data);
+      this.logger.debug('INSTA_DATA>>>', insta_data);
 
       const page_pic = await this.graphService.getPagePic(data.id);
-      console.log('PAGE_PIC>>', page_pic);
+      this.logger.debug('PAGE_PIC>>', page_pic);
 
       // TODO: Save images to S3
 
@@ -80,7 +82,7 @@ export class UserService {
         },
       });
 
-      console.log('PAGE_FOUND>>>', page_found);
+      this.logger.debug('PAGE_FOUND>>>', page_found);
 
       if (page_found) {
         return page_found;
@@ -106,7 +108,7 @@ export class UserService {
 
       return page;
     } catch (e) {
-      console.log(
+      this.logger.debug(
         'There was an error adding the page>>',
         e?.response?.data ?? e,
       );

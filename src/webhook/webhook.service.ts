@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -11,6 +12,8 @@ import { WebhookDto } from './dto';
 
 @Injectable()
 export class WebhookService {
+  private readonly logger = new Logger(WebhookService.name);
+
   constructor(
     private config: ConfigService,
     private recieveService: RecieveService,
@@ -29,7 +32,7 @@ export class WebhookService {
   }
 
   async getWebhook(body: WebhookDto) {
-    console.log('GOT WEBHOOK', body);
+    this.logger.debug('GOT WEBHOOK', body);
     if (body.object === 'page') {
       throw new NotFoundException('Page webhook not implemented');
     }
@@ -53,7 +56,7 @@ export class WebhookService {
 
       for (let i = 0; i < entry.messaging.length; i++) {
         const webhookEvent = entry.messaging[i];
-        console.log('EVENT>>', webhookEvent);
+        this.logger.debug('EVENT>>', webhookEvent);
 
         // Eliminate echoes
         if ('message' in webhookEvent && webhookEvent?.message?.is_echo) {

@@ -2,13 +2,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as admin from 'firebase-admin';
-import * as winston from 'winston';
-import {
-  // utilities as nestWinstonModuleUtilities,
-  WinstonModule,
-  WINSTON_MODULE_NEST_PROVIDER,
-} from 'nest-winston';
-import { transports } from './transports';
+import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { config } from './logger.config';
 
 declare global {
   interface Date {
@@ -25,21 +20,7 @@ Date.prototype.addDays = function (days) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,
-    logger: WinstonModule.createLogger({
-      level: 'info',
-      format: winston.format.combine(
-        winston.format.timestamp({
-          format: 'YYYY-MM-DD HH:mm:ss',
-        }),
-        winston.format.errors({ stack: true }),
-        winston.format.splat(),
-        winston.format.json(),
-      ),
-      transports: [
-        transports.console,
-        new winston.transports.File({ filename: 'logfile.log' }),
-      ],
-    }),
+    logger: WinstonModule.createLogger(config),
   });
 
   app.useGlobalPipes(

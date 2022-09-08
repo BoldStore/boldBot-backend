@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { Page } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -13,14 +13,15 @@ import { RecieveHelpers } from './recieve.helpers';
 
 @Injectable()
 export class RecieveService {
+  private readonly logger = new Logger(RecieveService.name);
   constructor(
     private graphService: GraphService,
     private prisma: PrismaService,
-    private helper: RecieveHelpers,
+    private helper: RecieveHelpers, // private readonly logger: Logger,
   ) {}
 
   async handleMessage(user: UserDto, webhookEvent: WebhookType, page: Page) {
-    console.log('PAGE>>>', page);
+    this.logger.debug('PAGE>>>', page);
     let responses: any;
     const message = webhookEvent.message;
     try {
@@ -92,7 +93,7 @@ export class RecieveService {
       });
       return response;
     } catch (e) {
-      console.log('ERROR>>>', e);
+      this.logger.debug('ERROR>>>', e);
       throw new HttpException('There was an error', 500);
     }
   }

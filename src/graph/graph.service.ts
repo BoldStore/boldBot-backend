@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { Message } from '@prisma/client';
 import axios, { AxiosResponse } from 'axios';
 import { API_URL } from 'src/constants';
@@ -8,15 +8,17 @@ import { MessageDto } from './dto';
 
 @Injectable()
 export class GraphService {
+  private readonly logger = new Logger(GraphService.name);
+
   async sendMessageApi(body: MessageDto, access_token: string) {
     try {
-      console.log('BODY>>', body);
+      this.logger.debug('BODY>>', body);
       await axios.post(
         `${API_URL}/me/messages?access_token=${access_token}`,
         body,
       );
     } catch (e) {
-      console.log(e?.response?.data ?? e);
+      this.logger.debug(e?.response?.data ?? e);
       throw new HttpException(
         e?.response?.data ?? e ?? '',
         e?.response?.status ?? 500,
@@ -62,10 +64,10 @@ export class GraphService {
       const response: AxiosResponse = await axios.get(
         `${API_URL}/${pageId}?fields=instagram_business_account&access_token=${access_token}`,
       );
-      console.log('GET INSTA ID RES>>', response.data);
+      this.logger.debug('GET INSTA ID RES>>', response.data);
       return response?.data?.instagram_business_account ?? response?.data;
     } catch (e) {
-      console.log('ERROR', e?.response?.data);
+      this.logger.debug('ERROR', e?.response?.data);
       throw new HttpException(e?.response?.data, e?.response?.status);
     }
   }
@@ -139,7 +141,10 @@ export class GraphService {
         message: 'Set up ice breakers',
       };
     } catch (e) {
-      console.log('SETTING UP ICE BREAKER ERROR: ', e?.response?.data ?? e);
+      this.logger.debug(
+        'SETTING UP ICE BREAKER ERROR: ',
+        e?.response?.data ?? e,
+      );
       throw new HttpException(e?.response?.data, e?.response?.status);
     }
   }
@@ -205,7 +210,10 @@ export class GraphService {
         message: 'Set up persistant menu',
       };
     } catch (e) {
-      console.log('ERROR IN SETTING PERSISTENT MENU>>', e?.response?.data ?? e);
+      this.logger.debug(
+        'ERROR IN SETTING PERSISTENT MENU>>',
+        e?.response?.data ?? e,
+      );
       if (e?.response?.data?.error?.code == 100) {
         throw new HttpException('Link should be a URL', e?.response?.status);
       } else {
@@ -225,14 +233,14 @@ export class GraphService {
         // },
       });
 
-      console.log(response.data);
+      this.logger.debug(response.data);
 
       return {
         success: true,
         message: 'Page subscriptions have been set',
       };
     } catch (e) {
-      console.log('ERROR SUBSCRIPTION>>', e?.response?.data);
+      this.logger.debug('ERROR SUBSCRIPTION>>', e?.response?.data);
       // throw new HttpException(e?.response?.data, e?.response?.status);
     }
   }

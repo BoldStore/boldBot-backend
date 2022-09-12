@@ -44,6 +44,8 @@ export class UserService {
 
   async addPage(user: User, dto: PageDto) {
     try {
+      console.log('DTO>>>>');
+      console.log(dto);
       const data = await this.graphService.getUserId(dto.access_token);
 
       this.logger.debug('DATA>>>', data);

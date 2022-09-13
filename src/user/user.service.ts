@@ -103,10 +103,10 @@ export class UserService {
         },
       });
 
-      // await this.graphService.setPageSubscription(
-      //   data.id,
-      //   insta_page.access_token,
-      // );
+      await this.graphService.setPageSubscription(
+        data.id,
+        insta_page.access_token,
+      );
 
       return page;
     } catch (e) {

@@ -74,59 +74,6 @@ export class RecieveHelpers {
         throw new HttpException('Limit exceeded', 500);
       }
 
-      // if (stats) {
-      // Why Relation?
-      // relation is the amount
-      // of services used for a page
-      // Basically this is what is inside
-      // of stats
-      // const relation = await this.prisma.serviceAmountRelation.findFirst({
-      //   where: {
-      //     serviceId: service.id,
-      //     statsId: stats.id,
-      //   },
-      // });
-
-      // If relation exists,
-      // check for the limit
-      // if (relation) {
-      //   if (relation.amount >= service_amount_relation.replies) {
-      //     throw new HttpException('Limit exceeded', 500);
-      //   }
-      // }
-      // If first time,
-      // Create the realtion and increase the replies
-      // count
-      // else {
-      // Create relation
-      // await this.prisma.serviceAmountRelation.create({
-      //   data: {
-      //     replies: 0,
-      //     serviceId: service.id,
-      //     statsId: stats.id,
-      //   },
-      // });
-      // }
-      // } else {
-      //   // Create stat
-      //   // If it doesn't exist to store the relation
-      //   const stat = await this.prisma.stats.create({
-      //     data: {
-      //       userId: userId,
-      //       pageId: page.id,
-      //     },
-      //   });
-
-      //   // Also, create the relation for above mentioned reason
-      //   await this.prisma.serviceAmountRelation.create({
-      //     data: {
-      //       replies: 0,
-      //       serviceId: service.id,
-      //       statsId: stat.id,
-      //     },
-      //   });
-      // }
-
       // This means all is good
       // Limit not exceeded
       return true;
@@ -137,7 +84,6 @@ export class RecieveHelpers {
 
   async addCount(userId: string, message_type: string) {
     try {
-      // TODO: Maybe only send page? would be easier to handle ig
       const service = await this.prisma.services.findFirst({
         where: {
           name: message_type,
@@ -151,10 +97,33 @@ export class RecieveHelpers {
         },
       });
 
-      // TODO: Now we dont need stats we can directly
-      // add a message - simpler and more elegant
-
       // TODO: Add customer
+      // Check if customer exists
+      // const customer = await this.prisma.customer.findFirst({
+      //   where: {
+      //     insta_id: user.insta_id,
+      //   },
+      // });
+
+      // if (customer) {
+      //   const customer_user = await this.prisma.customerUser.findFirst({
+      //     where: {
+      //       userId: page.userId,
+      //     },
+      //   });
+
+      //   if (!customer_user) {
+      //     // Create a relationship with customer
+      //   }
+      // } else {
+      //   const new_customer = await this.prisma.customer.create({
+      //     data: {
+      //       insta_id: insta_id,
+      //       name: userProfile.name,
+      //       username: userProfile.username,
+      //     },
+      //   });
+      // }
 
       const messageCount = await this.prisma.messageCount.create({
         data: {
@@ -163,62 +132,6 @@ export class RecieveHelpers {
           serviceId: service.id,
         },
       });
-
-      // const stats = await this.prisma.stats.findFirst({
-      //   where: {
-      //     userId: userId,
-      //     pageId: page.id,
-      //   },
-      // });
-
-      // if (stats) {
-      //   const relation = await this.prisma.serviceAmountRelation.findFirst({
-      //     where: {
-      //       serviceId: service.id,
-      //       statsId: stats.id,
-      //     },
-      //   });
-
-      //   if (relation) {
-      //     // Update stat count
-      //     await this.prisma.serviceAmountRelation.update({
-      //       where: {
-      //         id: relation.id,
-      //       },
-      //       data: {
-      //         amount: { increment: 1 },
-      //         serviceId: service.id,
-      //         statsId: stats.id,
-      //       },
-      //     });
-      //   } else {
-      //     // Create stat count
-      //     await this.prisma.serviceAmountRelation.create({
-      //       data: {
-      //         amount: 1,
-      //         serviceId: service.id,
-      //         statsId: stats.id,
-      //       },
-      //     });
-      //   }
-      // } else {
-      //   // Create stat
-      //   const stat = await this.prisma.stats.create({
-      //     data: {
-      //       userId: userId,
-      //       pageId: page.id,
-      //     },
-      //   });
-
-      //   // Create stat count
-      //   await this.prisma.serviceAmountRelation.create({
-      //     data: {
-      //       amount: 1,
-      //       serviceId: service.id,
-      //       statsId: stat.id,
-      //     },
-      //   });
-      // }
 
       return {
         message: 'ok',

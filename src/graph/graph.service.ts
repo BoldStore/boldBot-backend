@@ -225,6 +225,7 @@ export class GraphService {
   async setPageSubscription(pageId: string, access_token: string) {
     try {
       const url = `${API_URL}/${pageId}/subscribed_apps?subscribed_fields=messages&access_token=${access_token}`;
+      this.logger.debug('MESSAGES URL>>>>', url);
 
       const response = await axios.post(url, {
         // params: {

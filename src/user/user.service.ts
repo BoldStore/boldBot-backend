@@ -104,7 +104,7 @@ export class UserService {
       });
 
       await this.graphService.setPageSubscription(
-        data.id,
+        insta_page.id,
         insta_page.access_token,
       );
 
@@ -138,16 +138,5 @@ export class UserService {
       },
     });
     return me;
-  }
-
-  async setSubscription(page_id: string, access_token: string) {
-    try {
-      await this.graphService.setPageSubscription(page_id, access_token);
-    } catch (e) {
-      throw new HttpException(
-        e?.response?.data ?? e,
-        e?.response?.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
   }
 }

@@ -14,12 +14,15 @@ import { RazorpayModule } from 'nestjs-razorpay';
 import { ContactModule } from './contact/contact.module';
 import { StatsModule } from './stats/stats.module';
 import { config } from './logger.config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     WebhookModule,
     RecieveModule,
     GraphModule,
@@ -35,6 +38,7 @@ import { config } from './logger.config';
     WinstonModule.forRoot(config),
     ContactModule,
     StatsModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [Logger],

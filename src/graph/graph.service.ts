@@ -1,7 +1,12 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { Message } from '@prisma/client';
 import axios, { AxiosResponse } from 'axios';
-import { API_URL, WEBHOOK_PERMISSIONS } from 'src/constants';
+import {
+  API_URL,
+  CLIENT_ID,
+  GRANT_TYPE,
+  WEBHOOK_PERMISSIONS,
+} from 'src/constants';
 import { WebData } from 'src/message/dto';
 import { UserDto } from 'src/webhook/dto';
 import { MessageDto } from './dto';
@@ -243,6 +248,21 @@ export class GraphService {
     } catch (e) {
       this.logger.debug('ERROR SUBSCRIPTION>>', e?.response?.data);
       // throw new HttpException(e?.response?.data, e?.response?.status);
+    }
+  }
+
+  async getLongLivedToken(access_token: string) {
+    try {
+      const url = `${API_URL}/oauth/access_token?grant_type=${GRANT_TYPE}&client_id=${CLIENT_ID}&client_secret=${process.env.CLIENT_SECRET}&fb_exchange_token=${access_token}`;
+
+      const response = await axios.get(url);
+
+      return {
+        success: true,
+        access_token: response.data.access_token,
+      };
+    } catch (e) {
+      this.logger.debug('ERROR LONG LIVED ACCESS TOKEN>>', e?.response?.data);
     }
   }
 }

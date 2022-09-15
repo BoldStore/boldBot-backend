@@ -90,10 +90,16 @@ export class UserService {
         return page_found;
       }
 
+      // Get long lived access token
+      const long_lived_data = await this.graphService.getLongLivedToken(
+        insta_page.access_token,
+      );
+
       const page = await this.prisma.page.create({
         data: {
           userId: user.id,
-          page_access_token: insta_page?.access_token,
+          page_access_token:
+            long_lived_data.access_token ?? insta_page?.access_token,
           page_id: insta_page.id,
           page_name: insta_page.name,
           insta_id: insta_id.id,

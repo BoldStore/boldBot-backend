@@ -237,9 +237,11 @@ export class RecieveService {
       }
     }
 
-    // Help
-    if (!response && message.includes('help')) {
-      response = '';
+    // Live Agent
+    if (!response && message.includes('Live Agent')) {
+      response = {
+        text: 'Okay, transferring you to a live agent now. I will reply to you personally',
+      };
     }
 
     // Fallback

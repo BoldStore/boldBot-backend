@@ -238,7 +238,7 @@ export class RecieveService {
     }
 
     // Live Agent
-    if (!response && message.includes('Live Agent')) {
+    if (!response && message.includes('live agent')) {
       response = {
         text: 'Okay, transferring you to a live agent now. I will reply to you personally',
       };

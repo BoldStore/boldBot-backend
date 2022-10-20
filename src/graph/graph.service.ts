@@ -18,6 +18,7 @@ export class GraphService {
   async sendMessageApi(body: MessageDto, access_token: string) {
     try {
       this.logger.debug('BODY>>', body);
+      if (!body.message.text) return;
       await axios.post(
         `${API_URL}/me/messages?access_token=${access_token}`,
         body,

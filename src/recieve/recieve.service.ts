@@ -2,7 +2,6 @@ import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { Page } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Response } from 'src/services/response';
 import { UserDto, WebhookType } from 'src/webhook/dto';
 import { RecieveHelpers } from './recieve.helpers';
 
@@ -273,11 +272,11 @@ export class RecieveService {
 
     // Set the response based on the payload
     if (payload === 'GET_STARTED') {
-      response = Response.genNuxMessage(user);
+      // response = Response.genNuxMessage(user);
     }
     if (payload.includes('CARE')) {
       const care = 'Help';
-      response = Response.genNuxMessage(care);
+      // response = Response.genNuxMessage(care);
     }
 
     return response;

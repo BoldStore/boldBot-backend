@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as admin from 'firebase-admin';
 import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { config } from './logger.config';
+// import { config } from './logger.config';
 
 declare global {
   interface Date {
@@ -20,7 +20,7 @@ Date.prototype.addDays = function (days) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,
-    logger: WinstonModule.createLogger(config),
+    // logger: WinstonModule.createLogger(config),
   });
 
   app.useGlobalPipes(
@@ -38,7 +38,7 @@ async function bootstrap() {
   });
 
   app.enableCors();
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  // app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   await app.listen(3001);
 }
 bootstrap();

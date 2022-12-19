@@ -83,6 +83,7 @@ model Message {
   page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
   pageId String
 
+  service  Service @relation(fields: [type], references: [name], onDelete: Cascade)
   type     String
   question String?
 
@@ -109,7 +110,7 @@ model Text {
   @@map("texts")
 }
 
-model Services {
+model Service {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   name        String @unique
   description String
@@ -118,6 +119,7 @@ model Services {
   updatedAt             DateTime                @updatedAt
   ServiceAmountRelation ServiceAmountRelation[]
   MessageCount          MessageCount[]
+  Message               Message[]
 
   @@map("services")
 }
@@ -125,17 +127,16 @@ model Services {
 model ServiceAmountRelation {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  service   Services @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  serviceId String   @db.ObjectId
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  serviceId String  @db.ObjectId
+  plan      Plan?   @relation(fields: [planId], references: [id])
+  planId    String? @db.ObjectId
 
   amount  Int @default(0)
-  replies Int @default(0)
+  replies Int @default(0) // Reply limit (how many texts we will reply)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  plan   Plan?   @relation(fields: [planId], references: [id])
-  planId String? @db.ObjectId
 }
 
 model Plan {
@@ -155,15 +156,15 @@ model Plan {
 }
 
 model Transaction {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userId String
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
 
-  page   Page   @relation(fields: [pageId], references: [id], onDelete: SetNull)
-  pageId String
+  page   Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  pageId String?
 
-  plan   Plan              @relation(fields: [planId], references: [id], onDelete: SetNull)
-  planId String
+  plan   Plan?             @relation(fields: [planId], references: [id], onDelete: SetNull)
+  planId String?
   amount Int
   status TransactionStatus @default(PENDING)
 
@@ -174,15 +175,15 @@ model Transaction {
 }
 
 model Subscription {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userId String
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
 
-  page   Page   @relation(fields: [pageId], references: [id], onDelete: SetNull)
-  pageId String
+  page   Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  pageId String?
 
-  transaction   Plan   @relation(fields: [transactionId], references: [id], onDelete: SetNull)
-  transactionId String
+  transaction   Plan?   @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  transactionId String?
 
   startsAt DateTime?
   endsAt   DateTime?
@@ -196,15 +197,15 @@ model Subscription {
 }
 
 model MessageCount {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userId String
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
 
-  page   Page   @relation(fields: [pageId], references: [id], onDelete: SetNull)
-  pageId String
+  page   Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  pageId String?
 
-  service   Services? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  serviceId String
+  service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  serviceId String?
 
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   customerId String?
@@ -220,8 +221,8 @@ model Customer {
   username String @unique
   insta_id String @unique
 
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  createdAt DateTime @default(now())
+
   MessageCount MessageCount[]
   CustomerUser CustomerUser[]
 
@@ -234,11 +235,10 @@ model CustomerUser {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
-  customer   Customer @relation(fields: [userId], references: [id], onDelete: SetNull)
-  customerId String
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId String?
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@map("customer_user_relations")
 }

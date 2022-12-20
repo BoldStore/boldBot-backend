@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 interface Text {
@@ -11,9 +12,11 @@ interface IceBreaker {
 }
 
 export class IceBreakerDto {
+  @ApiProperty()
   @IsString()
   pageId: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   ice_breakers: IceBreaker[];
 }

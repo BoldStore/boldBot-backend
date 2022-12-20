@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import * as admin from 'firebase-admin';
 import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 // import { config } from './logger.config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 declare global {
   interface Date {
@@ -36,6 +37,14 @@ async function bootstrap() {
       privateKey: process.env.FIREBASE_PRIVATE_KEY,
     }),
   });
+  const config = new DocumentBuilder()
+    .setTitle('BOLDbot')
+    .setDescription('BOLDbot APIs')
+    .setVersion('1.0')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   app.enableCors();
   // app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));

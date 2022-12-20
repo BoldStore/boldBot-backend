@@ -7,9 +7,11 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { WebhookDto } from './dto';
 import { WebhookService } from './webhook.service';
 
+@ApiTags('Webhook')
 @Controller('webhook')
 export class WebhookController {
   constructor(private webhookService: WebhookService) {}

@@ -54,8 +54,8 @@ export class WebhookService {
         return;
       }
 
-      for (let i = 0; i < entry.messaging.length; i++) {
-        const webhookEvent = entry.messaging[i];
+      for (const element of entry.messaging) {
+        const webhookEvent = element;
         this.logger.debug('EVENT>>', webhookEvent);
 
         // Eliminate echoes

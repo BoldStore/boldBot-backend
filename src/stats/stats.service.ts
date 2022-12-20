@@ -18,10 +18,10 @@ export class StatsService {
 
     const services = [];
 
-    for (let i = 0; i < count.length; i++) {
-      const serviceId = count[i].serviceId;
+    for (const element of count) {
+      const serviceId = element.serviceId;
       services.push(
-        await this.prisma.services.findFirst({
+        await this.prisma.service.findFirst({
           where: {
             id: serviceId,
           },

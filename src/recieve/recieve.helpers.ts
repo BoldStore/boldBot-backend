@@ -10,7 +10,7 @@ export class RecieveHelpers {
   async validateLimit(userId: string, message_type: string) {
     try {
       // To check which service the user is requesting
-      const service = await this.prisma.services.findFirstOrThrow({
+      const service = await this.prisma.service.findFirstOrThrow({
         where: {
           name: message_type,
         },
@@ -84,7 +84,7 @@ export class RecieveHelpers {
 
   async addCount(userId: string, message_type: string) {
     try {
-      const service = await this.prisma.services.findFirst({
+      const service = await this.prisma.service.findFirst({
         where: {
           name: message_type,
         },

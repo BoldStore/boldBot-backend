@@ -144,7 +144,7 @@ model Plan {
   name            String @unique
   description     String
   price           Int
-  days            Int @default(30)
+  days            Int    @default(30)
   razorpay_planId String @unique
   currency        String @default("INR")
 
@@ -165,10 +165,11 @@ model Transaction {
   page   Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
   pageId String? @db.ObjectId
 
-  plan   Plan?             @relation(fields: [planId], references: [id], onDelete: SetNull)
-  planId String?           @db.ObjectId
-  amount Int
-  status TransactionStatus @default(PENDING)
+  plan            Plan?             @relation(fields: [planId], references: [id], onDelete: SetNull)
+  planId          String?           @db.ObjectId
+  amount          Int
+  status          TransactionStatus @default(PENDING)
+  razorpay_sub_id String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -190,7 +191,8 @@ model Subscription {
   startsAt DateTime?
   endsAt   DateTime?
 
-  status SubscriptionStatus @default(ACTIVE)
+  status          SubscriptionStatus @default(ACTIVE)
+  razorpay_sub_id String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

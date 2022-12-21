@@ -102,6 +102,34 @@ export class TransactionService {
       },
     });
 
+    // Create subscription
+    // Check if subscription already there
+    // If yes
+    // Cancel Subscription from razorpay
+    // Then create a new subscription
+    const subscription = await this.prisma.subscription.findFirst({
+      where: {
+        pageId: page.id,
+        OR: [
+          {
+            status: SubscriptionStatus.ACTIVE,
+          },
+          {
+            status: SubscriptionStatus.QUEUED,
+          },
+        ],
+      },
+    });
+
+    if (subscription) {
+      this.razorpayClient.subscriptions.cancel(subscription.razorpay_sub_id);
+    }
+
+    const razorpay_sub = this.razorpayClient.subscriptions.create({
+      plan_id: plan.razorpay_planId,
+      total_count: 12,
+    });
+
     // Create transaction
     const transaction = await this.prisma.transaction.create({
       data: {
@@ -110,17 +138,15 @@ export class TransactionService {
         amount: plan.price,
         status: TransactionStatus.PENDING,
         pageId: page.id,
+        razorpay_sub_id: razorpay_sub.id,
       },
     });
 
-    // Create razorpay order
-
-    return transaction;
+    return { transaction, razorpay_sub };
   }
 
   async verifyTransaction(transactionId: string): Promise<any> {
     try {
-      // TODO: Integrate razorpay
       const transaction = await this.prisma.transaction.update({
         where: {
           id: transactionId,
@@ -148,6 +174,8 @@ export class TransactionService {
         status = SubscriptionStatus.QUEUED;
       }
 
+      // TODO: Razorpay sub_id
+      // TODO: Verify razorpay payment
       // Add subscription to user
       const subscription = await this.prisma.subscription.create({
         data: {
@@ -160,10 +188,9 @@ export class TransactionService {
               : null,
           status,
           transactionId: transaction.id,
+          razorpay_sub_id: '',
         },
       });
-
-      // TODO: Send email to user
 
       return subscription;
     } catch (e) {

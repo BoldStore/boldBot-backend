@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Post,
@@ -10,6 +12,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { WebhookDto } from './dto';
 import { WebhookService } from './webhook.service';
+import { validateWebhookSignature } from 'razorpay';
 
 @ApiTags('Webhook')
 @Controller('webhook')
@@ -30,5 +33,22 @@ export class WebhookController {
   @Post()
   getWebhook(@Body() dto: WebhookDto) {
     return this.webhookService.getWebhook(dto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('razorpay')
+  razorpayWebhooks(@Body() body: any, @Headers() headers) {
+    if (
+      headers['x-razorpay-signature'] &&
+      validateWebhookSignature(
+        JSON.stringify(body),
+        headers['x-razorpay-signature'],
+        process.env.RAZORPAY_WEBHOOK_SECRET,
+      )
+    ) {
+      return this.webhookService.razorpayWebhooks(body);
+    } else {
+      throw new ForbiddenException('Invalid request');
+    }
   }
 }

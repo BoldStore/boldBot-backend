@@ -9,6 +9,7 @@ import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RecieveService } from 'src/recieve/recieve.service';
 import { WebhookDto } from './dto';
+import { RazorpayEvents } from './razorpay.events';
 
 @Injectable()
 export class WebhookService {
@@ -100,5 +101,35 @@ export class WebhookService {
     }
 
     return 'Event received';
+  }
+
+  async razorpayWebhooks(body: any) {
+    switch (body.event) {
+      case RazorpayEvents.CHARGED:
+        console.log('CHARGED');
+        break;
+
+      case RazorpayEvents.ACTIVATED:
+        console.log('ACTIVATED');
+        break;
+
+      case RazorpayEvents.CANCELLED:
+        console.log('CANCELLED');
+        break;
+
+      case RazorpayEvents.COMPLETED:
+        console.log('COMPLETED');
+        break;
+
+      case RazorpayEvents.HALTED:
+        console.log('HALTED');
+        break;
+
+      case RazorpayEvents.PENDING:
+        console.log('PENDING');
+        break;
+    }
+
+    return body;
   }
 }

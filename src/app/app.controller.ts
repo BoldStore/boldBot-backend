@@ -6,6 +6,6 @@ export class AppController {
   @Get()
   index() {
     this.logger.debug('Hello BOLDbot!', AppController.name);
-    return 'BoldBot is up and running';
+    return 'BOLDbot is up and running';
   }
 }

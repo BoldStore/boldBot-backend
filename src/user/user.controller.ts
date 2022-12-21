@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { FirebaseUser } from '@tfarras/nestjs-firebase-auth';
 import { GetUser } from 'src/auth/decorator';
@@ -6,6 +7,7 @@ import { FirebaseGuard, UserGuard } from 'src/auth/guard';
 import { PageDto } from './dto';
 import { UserService } from './user.service';
 
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private service: UserService) {}

@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 interface Text {
@@ -6,9 +7,11 @@ interface Text {
 }
 
 export class TextDto {
+  @ApiProperty()
   @IsNotEmpty()
   texts: Text[];
 
+  @ApiProperty()
   @IsString()
   pageId?: string;
 }

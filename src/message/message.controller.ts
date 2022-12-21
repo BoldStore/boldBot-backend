@@ -7,6 +7,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import { UserGuard } from 'src/auth/guard';
@@ -20,6 +21,7 @@ import {
 import { LimitInterceptor, PageInterceptor } from './interceptor';
 import { MessageService } from './message.service';
 
+@ApiTags('Message')
 @UseGuards(UserGuard)
 @UseInterceptors(PageInterceptor)
 @Controller('message')

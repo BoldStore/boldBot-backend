@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 enum Fields {
@@ -61,11 +62,13 @@ export type WebhookType = {
 };
 
 export class WebhookDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @IsEnum(['instagram', 'page'])
   object: string;
 
+  @ApiProperty()
   @IsArray()
   entry: Array<{
     id: string;

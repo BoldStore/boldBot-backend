@@ -32,8 +32,8 @@ import { TasksModule } from './tasks/tasks.module';
     PrismaModule,
     TransactionModule,
     RazorpayModule.forRoot({
-      key_id: 'razorpay_key_id',
-      key_secret: 'razorpay_key_secret',
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
     }),
     WinstonModule.forRoot(config),
     ContactModule,

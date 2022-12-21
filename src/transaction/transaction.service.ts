@@ -1,11 +1,15 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { SubscriptionStatus, TransactionStatus, User } from '@prisma/client';
+import { InjectRazorpay } from 'nestjs-razorpay';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { PlanDto } from './dto';
+import { BuyDto, PlanDto } from './dto';
 
 @Injectable()
 export class TransactionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @InjectRazorpay() private readonly razorpayClient,
+  ) {}
 
   async getTransactions(user: User): Promise<any> {
     const transactions = await this.prisma.transaction.findMany({
@@ -24,12 +28,67 @@ export class TransactionService {
     return 'This action adds a new subscription';
   }
 
+  async addPlan(dto: PlanDto): Promise<any> {
+    // Create plan on razorpay
+    const razorpay_plan = await this.razorpayClient.plans.create({
+      period: dto.razorpayOptions.period ?? 'monthly',
+      interval: dto.razorpayOptions.interval ?? 1,
+      item: {
+        name: dto.name,
+        amount: dto.price,
+        currency: dto.currency ?? 'INR',
+        description: dto.description,
+      },
+    });
+    // Save plan to db
+    const plan = await this.prisma.plan.create({
+      data: {
+        name: dto.name,
+        description: dto.description,
+        price: dto.price,
+        days: dto.days,
+        razorpay_planId: razorpay_plan.id,
+        currency: dto.currency,
+      },
+    });
+    return plan;
+  }
+
+  async updatePlan(dto: PlanDto): Promise<any> {
+    // Create plan on razorpay
+    const razorpay_plan = await this.razorpayClient.plans.create({
+      period: dto.razorpayOptions.period ?? 'monthly',
+      interval: dto.razorpayOptions.interval ?? 1,
+      item: {
+        name: dto.name,
+        amount: dto.price,
+        currency: dto.currency ?? 'INR',
+        description: dto.description,
+      },
+    });
+    // Save plan to db
+    const plan = await this.prisma.plan.update({
+      where: {
+        id: dto.planId,
+      },
+      data: {
+        name: dto.name,
+        description: dto.description,
+        price: dto.price,
+        days: dto.days,
+        razorpay_planId: razorpay_plan.id,
+        currency: dto.currency,
+      },
+    });
+    return plan;
+  }
+
   async getPlans(): Promise<any> {
     const plans = await this.prisma.plan.findMany();
     return plans;
   }
 
-  async buyPlan(user: User, dto: PlanDto): Promise<any> {
+  async buyPlan(user: User, dto: BuyDto): Promise<any> {
     // Check if user has a page
     const page = await this.prisma.page.findFirstOrThrow({
       where: {

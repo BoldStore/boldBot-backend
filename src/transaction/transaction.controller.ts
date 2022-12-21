@@ -1,6 +1,7 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
+import { PlanDto } from './dto';
 import { TransactionService } from './transaction.service';
 
 @Controller('transaction')
@@ -23,7 +24,7 @@ export class TransactionController {
   }
 
   @Post()
-  buyPlan(@GetUser() user: User) {
-    return this.transactionService.buyPlan(user);
+  buyPlan(@GetUser() user: User, @Body() dto: PlanDto) {
+    return this.transactionService.buyPlan(user, dto);
   }
 }

@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { SubscriptionStatus, User } from '@prisma/client';
+import { SubscriptionStatus, TransactionStatus, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PlanDto } from './dto';
 
 @Injectable()
 export class TransactionService {
@@ -28,7 +29,7 @@ export class TransactionService {
     return plans;
   }
 
-  async buyPlan(user: User): Promise<any> {
+  async buyPlan(user: User, dto: PlanDto): Promise<any> {
     // Check if user has a page
     const page = await this.prisma.page.findFirstOrThrow({
       where: {
@@ -36,10 +37,9 @@ export class TransactionService {
       },
     });
 
-    // TODO: get plan Id
-    const plan = await this.prisma.plan.findFirstOrThrow({
+    const plan = await this.prisma.plan.findUnique({
       where: {
-        name: 'Basic',
+        id: dto.planId,
       },
     });
 
@@ -49,10 +49,12 @@ export class TransactionService {
         userId: user.id,
         planId: plan.id,
         amount: plan.price,
-        status: 'PENDING',
+        status: TransactionStatus.PENDING,
         pageId: page.id,
       },
     });
+
+    // Create razorpay order
 
     return transaction;
   }
@@ -65,7 +67,7 @@ export class TransactionService {
           id: transactionId,
         },
         data: {
-          status: 'CONFIRMED',
+          status: TransactionStatus.CONFIRMED,
         },
         include: {
           plan: true,
@@ -73,18 +75,18 @@ export class TransactionService {
       });
 
       // If not - Create subscription
-      let status: SubscriptionStatus = 'ACTIVE';
+      let status: SubscriptionStatus = SubscriptionStatus.ACTIVE;
 
       // Check for subscription
       const userSubscription = await this.prisma.subscription.findFirst({
         where: {
           userId: transaction.userId,
-          status: 'ACTIVE',
+          status: SubscriptionStatus.ACTIVE,
         },
       });
       // If exists - Add to queue
       if (userSubscription) {
-        status = 'QUEUED';
+        status = SubscriptionStatus.QUEUED;
       }
 
       // Add subscription to user
@@ -92,8 +94,11 @@ export class TransactionService {
         data: {
           userId: transaction.userId,
           pageId: transaction.pageId,
-          startsAt: status == 'ACTIVE' ? new Date() : null,
-          endsAt: new Date(new Date().addDays(transaction.plan.days)),
+          startsAt: status == SubscriptionStatus.ACTIVE ? new Date() : null,
+          endsAt:
+            status == SubscriptionStatus.ACTIVE
+              ? new Date(new Date().addDays(transaction.plan.days))
+              : null,
           status,
           transactionId: transaction.id,
         },

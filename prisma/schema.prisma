@@ -56,7 +56,7 @@ model User {
 model Page {
   id                   String  @id @default(auto()) @map("_id") @db.ObjectId
   user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId               String
+  userId               String  @db.ObjectId
   page_access_token    String
   page_id              String  @unique
   page_name            String
@@ -79,9 +79,9 @@ model Message {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
+  userId String @db.ObjectId
   page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
-  pageId String
+  pageId String @db.ObjectId
 
   service  Service @relation(fields: [type], references: [name], onDelete: Cascade)
   type     String
@@ -99,7 +99,7 @@ model Text {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  messageId String
+  messageId String  @db.ObjectId
 
   key   String
   value String
@@ -140,15 +140,17 @@ model ServiceAmountRelation {
 }
 
 model Plan {
-  id          String                  @id @default(auto()) @map("_id") @db.ObjectId
-  name        String                  @unique
-  description String
-  price       Int
-  services    ServiceAmountRelation[]
-  days        Int
+  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  name            String @unique
+  description     String
+  price           Int
+  days            Int @default(30)
+  razorpay_planId String @unique
+  currency        String @default("INR")
 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  services      ServiceAmountRelation[]
   transactions  Transaction[]
   subscriptions Subscription[]
 
@@ -158,13 +160,13 @@ model Plan {
 model Transaction {
   id     String  @id @default(auto()) @map("_id") @db.ObjectId
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userId String?
+  userId String? @db.ObjectId
 
   page   Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
-  pageId String?
+  pageId String? @db.ObjectId
 
   plan   Plan?             @relation(fields: [planId], references: [id], onDelete: SetNull)
-  planId String?
+  planId String?           @db.ObjectId
   amount Int
   status TransactionStatus @default(PENDING)
 
@@ -177,13 +179,13 @@ model Transaction {
 model Subscription {
   id     String  @id @default(auto()) @map("_id") @db.ObjectId
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userId String?
+  userId String? @db.ObjectId
 
   page   Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
-  pageId String?
+  pageId String? @db.ObjectId
 
   transaction   Plan?   @relation(fields: [transactionId], references: [id], onDelete: SetNull)
-  transactionId String?
+  transactionId String? @db.ObjectId
 
   startsAt DateTime?
   endsAt   DateTime?
@@ -199,16 +201,16 @@ model Subscription {
 model MessageCount {
   id     String  @id @default(auto()) @map("_id") @db.ObjectId
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userId String?
+  userId String? @db.ObjectId
 
   page   Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
-  pageId String?
+  pageId String? @db.ObjectId
 
   service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  serviceId String?
+  serviceId String?  @db.ObjectId
 
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  customerId String?
+  customerId String?   @db.ObjectId
 
   createdAt DateTime @default(now())
 
@@ -233,10 +235,10 @@ model CustomerUser {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
+  userId String @db.ObjectId
 
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  customerId String?
+  customerId String?   @db.ObjectId
 
   createdAt DateTime @default(now())
 

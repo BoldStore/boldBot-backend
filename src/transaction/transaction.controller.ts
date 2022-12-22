@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
+import { UserGuard } from 'src/auth/guard';
 import { BuyDto, PlanDto } from './dto';
 import { TransactionService } from './transaction.service';
 
@@ -10,14 +11,16 @@ import { TransactionService } from './transaction.service';
 export class TransactionController {
   constructor(private transactionService: TransactionService) {}
 
+  @UseGuards(UserGuard)
   @Get()
   getTransactions(@GetUser() user: User) {
     return this.transactionService.getTransactions(user);
   }
 
-  @Get()
-  addSubscription() {
-    return this.transactionService.addSubscription();
+  @UseGuards(UserGuard)
+  @Post()
+  buyPlan(@GetUser() user: User, @Body() dto: BuyDto) {
+    return this.transactionService.buyPlan(user, dto);
   }
 
   // TODO: Validate if admin
@@ -34,10 +37,5 @@ export class TransactionController {
   @Get('plan')
   getPlans() {
     return this.transactionService.getPlans();
-  }
-
-  @Post()
-  buyPlan(@GetUser() user: User, @Body() dto: BuyDto) {
-    return this.transactionService.buyPlan(user, dto);
   }
 }

@@ -171,8 +171,9 @@ model Transaction {
   status          TransactionStatus @default(PENDING)
   razorpay_sub_id String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Subscription Subscription[]
 
   @@map("transactions")
 }
@@ -185,8 +186,11 @@ model Subscription {
   page   Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
   pageId String? @db.ObjectId
 
-  transaction   Plan?   @relation(fields: [transactionId], references: [id], onDelete: SetNull)
-  transactionId String? @db.ObjectId
+  transaction   Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  transactionId String?      @db.ObjectId
+
+  plan   Plan?   @relation(fields: [planId], references: [id], onDelete: SetNull)
+  planId String? @db.ObjectId
 
   startsAt DateTime?
   endsAt   DateTime?

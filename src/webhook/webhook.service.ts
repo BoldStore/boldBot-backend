@@ -1,10 +1,12 @@
 import {
   ForbiddenException,
+  HttpException,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SubscriptionStatus, TransactionStatus } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RecieveService } from 'src/recieve/recieve.service';
@@ -104,32 +106,88 @@ export class WebhookService {
   }
 
   async razorpayWebhooks(body: any) {
-    switch (body.event) {
-      case RazorpayEvents.CHARGED:
-        console.log('CHARGED');
-        break;
+    try {
+      switch (body.event) {
+        case RazorpayEvents.CHARGED:
+          const r_sub_id = body.payload.subscription.entity.id;
+          const pending_transaction =
+            await this.prisma.transaction.findFirstOrThrow({
+              where: {
+                razorpay_sub_id: r_sub_id,
+                status: TransactionStatus.PENDING,
+              },
+            });
+          const transaction = await this.prisma.transaction.update({
+            where: {
+              id: pending_transaction.id,
+            },
+            data: {
+              status: TransactionStatus.CONFIRMED,
+            },
+            include: {
+              plan: true,
+            },
+          });
 
-      case RazorpayEvents.ACTIVATED:
-        console.log('ACTIVATED');
-        break;
+          // If not - Create subscription
+          let status: SubscriptionStatus = SubscriptionStatus.ACTIVE;
 
-      case RazorpayEvents.CANCELLED:
-        console.log('CANCELLED');
-        break;
+          // Check for subscription
+          const userSubscription = await this.prisma.subscription.findFirst({
+            where: {
+              userId: transaction.userId,
+              status: SubscriptionStatus.ACTIVE,
+            },
+          });
+          // If exists - Add to queue
+          if (userSubscription) {
+            status = SubscriptionStatus.QUEUED;
+          }
 
-      case RazorpayEvents.COMPLETED:
-        console.log('COMPLETED');
-        break;
+          // Add subscription to user
+          const subscription = await this.prisma.subscription.create({
+            data: {
+              userId: transaction.userId,
+              pageId: transaction.pageId,
+              startsAt: status == SubscriptionStatus.ACTIVE ? new Date() : null,
+              endsAt:
+                status == SubscriptionStatus.ACTIVE
+                  ? new Date(new Date().addDays(transaction.plan.days))
+                  : null,
+              status,
+              transactionId: transaction.id,
+              razorpay_sub_id: transaction.razorpay_sub_id,
+              planId: transaction.planId,
+            },
+          });
+          return subscription;
 
-      case RazorpayEvents.HALTED:
-        console.log('HALTED');
-        break;
+        case RazorpayEvents.CANCELLED:
+          // TODO: Implement cancelled handler
+          console.log('CANCELLED');
+          break;
 
-      case RazorpayEvents.PENDING:
-        console.log('PENDING');
-        break;
+        case RazorpayEvents.COMPLETED:
+          // TODO: Implement completed handler
+          console.log('COMPLETED');
+          break;
+
+        case RazorpayEvents.HALTED:
+          console.log('HALTED');
+          break;
+
+        case RazorpayEvents.PENDING:
+          console.log('PENDING');
+          break;
+
+        default:
+          return 'Handler not implemented yet';
+      }
+
+      return body;
+    } catch (e) {
+      this.logger.error('Error in razorpay webhook', e);
+      throw new HttpException(e, 500);
     }
-
-    return body;
   }
 }

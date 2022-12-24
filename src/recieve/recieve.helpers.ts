@@ -128,6 +128,7 @@ export class RecieveHelpers {
           pageId: page.id,
           userId: userId,
           serviceName: message_type,
+          customerId: customer.id,
         },
       });
 

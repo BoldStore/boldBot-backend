@@ -13,7 +13,7 @@ import { TransactionModule } from './transaction/transaction.module';
 import { RazorpayModule } from 'nestjs-razorpay';
 import { ContactModule } from './contact/contact.module';
 import { StatsModule } from './stats/stats.module';
-import { config } from './logger.config';
+import { logger_config } from './logger.config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './tasks/tasks.module';
 
@@ -35,7 +35,7 @@ import { TasksModule } from './tasks/tasks.module';
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     }),
-    WinstonModule.forRoot(config),
+    WinstonModule.forRoot(logger_config),
     ContactModule,
     StatsModule,
     TasksModule,

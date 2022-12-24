@@ -11,7 +11,7 @@ export const papertrail = new winston.transports.Http({
   ssl: true,
 });
 
-export const config = {
+export const logger_config = {
   level: 'silly',
   format: winston.format.combine(
     winston.format.timestamp({

@@ -18,7 +18,7 @@ import {
   StoryReplyDto,
   TextDto,
 } from './dto';
-import { LimitInterceptor, PageInterceptor } from './interceptor';
+import { PageInterceptor } from './interceptor';
 import { MessageService } from './message.service';
 
 @ApiTags('Message')
@@ -29,7 +29,6 @@ export class MessageController {
   constructor(private messageService: MessageService) {}
 
   @Post('greeting')
-  @UseInterceptors(LimitInterceptor)
   addGreeting(@GetUser() user: User, @Body() dto: TextDto) {
     return this.messageService.addGreeting(user, dto);
   }
@@ -40,7 +39,6 @@ export class MessageController {
   }
 
   @Post('ice-breaker')
-  @UseInterceptors(LimitInterceptor)
   addIceBreaker(@GetUser() user: User, @Body() dto: IceBreakerDto) {
     return this.messageService.addIceBreaker(user, dto);
   }
@@ -51,7 +49,6 @@ export class MessageController {
   }
 
   @Post('persistent-menu')
-  @UseInterceptors(LimitInterceptor)
   addPersistentMenu(@GetUser() user: User, @Body() dto: PersistentMenuDto) {
     return this.messageService.addPersistentMenu(user, dto);
   }
@@ -62,7 +59,6 @@ export class MessageController {
   }
 
   @Post('story-reply')
-  @UseInterceptors(LimitInterceptor)
   addStoryReply(@GetUser() user: User, @Body() dto: StoryReplyDto) {
     return this.messageService.addStoryReply(user, dto);
   }
@@ -73,7 +69,6 @@ export class MessageController {
   }
 
   @Post('story-mention')
-  @UseInterceptors(LimitInterceptor)
   addStoryMention(@GetUser() user: User, @Body() dto: StoryMentionDto) {
     return this.messageService.addStoryMention(user, dto);
   }

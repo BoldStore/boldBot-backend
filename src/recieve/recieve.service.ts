@@ -3,12 +3,8 @@ import { Page } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserDto, WebhookType } from 'src/webhook/dto';
+import { MessageTypes } from './message.type';
 import { RecieveHelpers } from './recieve.helpers';
-
-// TODO: Check for plan/subscription
-// TODO: Check if limit reached
-// TODO: Create customer profile
-// Connect to user
 
 @Injectable()
 export class RecieveService {
@@ -16,7 +12,7 @@ export class RecieveService {
   constructor(
     private graphService: GraphService,
     private prisma: PrismaService,
-    private helper: RecieveHelpers, // private readonly logger: Logger,
+    private helper: RecieveHelpers,
   ) {}
 
   async handleMessage(user: UserDto, webhookEvent: WebhookType, page: Page) {
@@ -30,12 +26,16 @@ export class RecieveService {
         } else if (message.quick_reply) {
           responses = this.handleQuickReply(webhookEvent);
         } else if (message.attachments) {
-          responses = await this.handleAttachmentMessage(webhookEvent, page);
+          responses = await this.handleAttachmentMessage(
+            webhookEvent,
+            page,
+            user,
+          );
         } else if (message.text) {
-          responses = await this.handleTextMessage(webhookEvent, page);
+          responses = await this.handleTextMessage(webhookEvent, page, user);
         }
       } else if (webhookEvent.postback) {
-        responses = await this.handlePostback(webhookEvent, page);
+        responses = await this.handlePostback(webhookEvent, page, user);
       } else if (webhookEvent.referral) {
         responses = this.handleReferral(webhookEvent);
       }
@@ -67,9 +67,24 @@ export class RecieveService {
     return this.handlePayload(payload);
   }
 
-  async handlePostback(webhookEvent: WebhookType, page: Page) {
+  async handlePostback(webhookEvent: WebhookType, page: Page, user: UserDto) {
     try {
       const postback = webhookEvent.postback;
+
+      const isAvailable = await this.helper.validateLimit(
+        page,
+        webhookEvent.postback.payload,
+      );
+
+      if (!isAvailable) {
+        await this.helper.addCount(
+          page.userId,
+          webhookEvent.postback.payload,
+          user,
+          true,
+        );
+        throw new HttpException('Limit Reached', 400);
+      }
 
       // Get message
       const message = await this.prisma.message.findFirst({
@@ -84,7 +99,11 @@ export class RecieveService {
       });
 
       // Add count
-      await this.helper.addCount(page.userId, webhookEvent.postback.payload);
+      await this.helper.addCount(
+        page.userId,
+        webhookEvent.postback.payload,
+        user,
+      );
 
       const response = [];
       message.texts.forEach((text) => {
@@ -103,17 +122,38 @@ export class RecieveService {
     return this.handlePayload(payload);
   }
 
-  async handleAttachmentMessage(webhookEvent: WebhookType, page: Page) {
+  async handleAttachmentMessage(
+    webhookEvent: WebhookType,
+    page: Page,
+    user: UserDto,
+  ) {
     const attachment = webhookEvent.message.attachments;
     let response: any;
 
     // Story mentions
-    if (attachment.length > 0 && attachment[0].type == 'story_mention') {
+    if (
+      attachment.length > 0 &&
+      attachment[0].type == MessageTypes.STORY_MENTION
+    ) {
+      const isAvailable = await this.helper.validateLimit(
+        page,
+        MessageTypes.STORY_MENTION,
+      );
+
+      if (!isAvailable) {
+        await this.helper.addCount(
+          page.userId,
+          MessageTypes.STORY_MENTION,
+          user,
+          true,
+        );
+        throw new HttpException('Limit Reached', 400);
+      }
       const reply = await this.prisma.message.findFirst({
         where: {
           userId: page.userId,
           pageId: page.id,
-          type: 'story-mention',
+          type: MessageTypes.STORY_MENTION,
         },
         include: {
           texts: true,
@@ -135,12 +175,16 @@ export class RecieveService {
       }
 
       // Add count
-      await this.helper.addCount(page.userId, 'story-reply');
+      await this.helper.addCount(page.userId, MessageTypes.STORY_MENTION, user);
     }
     return response;
   }
 
-  async handleTextMessage(webhookEvent: WebhookType, page: Page) {
+  async handleTextMessage(
+    webhookEvent: WebhookType,
+    page: Page,
+    user: UserDto,
+  ) {
     let response: any;
     const message = webhookEvent.message.text.trim().toLowerCase();
 
@@ -157,6 +201,20 @@ export class RecieveService {
 
     // Handle story reply
     if (webhookEvent?.message?.reply_to?.story) {
+      const isAvailable = await this.helper.validateLimit(
+        page,
+        MessageTypes.STORY_REPLY,
+      );
+
+      if (!isAvailable) {
+        await this.helper.addCount(
+          page.userId,
+          MessageTypes.STORY_REPLY,
+          user,
+          true,
+        );
+        throw new HttpException('Limit Reached', 400);
+      }
       const replyText = webhookEvent.message.text;
 
       const reply = await this.prisma.message.findFirst({
@@ -164,7 +222,7 @@ export class RecieveService {
           userId: page.userId,
           pageId: page.id,
           question: replyText,
-          type: 'story-reply',
+          type: MessageTypes.STORY_REPLY,
         },
         include: {
           texts: true,
@@ -186,7 +244,7 @@ export class RecieveService {
       }
 
       // Add count
-      await this.helper.addCount(page.userId, 'story-reply');
+      await this.helper.addCount(page.userId, MessageTypes.STORY_REPLY, user);
     }
 
     // To handle exclamations and words
@@ -198,19 +256,24 @@ export class RecieveService {
       !response &&
       greetings.some((greeting) => message_split.includes(greeting))
     ) {
-      // const isAvailable = await this.helper.validateLimit(
-      //   page.userId,
-      //   'greeting',
-      // );
+      const isAvailable = await this.helper.validateLimit(
+        page,
+        MessageTypes.GREETING,
+      );
 
-      // if (!isAvailable) {
-      //   throw new HttpException('Limit Reached', 400);
-      //   // TODO: Add to failed
-      // }
+      if (!isAvailable) {
+        await this.helper.addCount(
+          page.userId,
+          MessageTypes.GREETING,
+          user,
+          true,
+        );
+        throw new HttpException('Limit Reached', 400);
+      }
       // Get greeting
       const message = await this.prisma.message.findFirst({
         where: {
-          type: 'greeting',
+          type: MessageTypes.GREETING,
           pageId: page.id,
         },
         include: {
@@ -219,7 +282,7 @@ export class RecieveService {
       });
 
       // Add count
-      await this.helper.addCount(page.userId, 'greeting');
+      await this.helper.addCount(page.userId, MessageTypes.GREETING, user);
 
       if (message?.texts?.length > 0) {
         const arr = [];

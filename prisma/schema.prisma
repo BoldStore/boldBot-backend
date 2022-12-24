@@ -212,11 +212,13 @@ model MessageCount {
   page   Page?   @relation(fields: [pageId], references: [id], onDelete: SetNull)
   pageId String? @db.ObjectId
 
-  service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  serviceId String?  @db.ObjectId
+  service     Service? @relation(fields: [serviceName], references: [name], onDelete: SetNull)
+  serviceName String?
 
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   customerId String?   @db.ObjectId
+
+  failed Boolean @default(false)
 
   createdAt DateTime @default(now())
 

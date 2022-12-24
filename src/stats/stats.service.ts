@@ -8,7 +8,7 @@ export class StatsService {
 
   async getStats(user: User, page_id: string) {
     const count = await this.prisma.messageCount.groupBy({
-      by: ['serviceId'],
+      by: ['serviceName'],
       _count: true,
       where: {
         userId: user.id,
@@ -19,11 +19,11 @@ export class StatsService {
     const services = [];
 
     for (const element of count) {
-      const serviceId = element.serviceId;
+      const serviceName = element.serviceName;
       services.push(
         await this.prisma.service.findFirst({
           where: {
-            id: serviceId,
+            name: serviceName,
           },
           select: {
             name: true,
@@ -36,7 +36,7 @@ export class StatsService {
     return {
       count: count.map((e) => {
         const service = services.find(
-          (service_data) => service_data.id == e.serviceId,
+          (service_data) => service_data.name == e.serviceName,
         );
         return {
           service: service.name,

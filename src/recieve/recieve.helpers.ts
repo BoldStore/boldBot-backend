@@ -1,5 +1,7 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { Page, SubscriptionStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserDto } from 'src/webhook/dto';
 
 @Injectable()
 export class RecieveHelpers {
@@ -7,38 +9,14 @@ export class RecieveHelpers {
   constructor(private prisma: PrismaService) {}
 
   // Basically validates if person has exhausted the quota
-  async validateLimit(userId: string, message_type: string) {
+  async validateLimit(page: Page, message_type: string) {
     try {
-      // To check which service the user is requesting
-      const service = await this.prisma.service.findFirstOrThrow({
-        where: {
-          name: message_type,
-        },
-      });
-
-      // Get page of the user
-      // which is requesting the service
-      const page = await this.prisma.page.findFirstOrThrow({
-        where: {
-          userId: userId,
-        },
-      });
-
       // Check for active subscription
       const subscription = await this.prisma.subscription.findFirstOrThrow({
         where: {
-          userId: userId,
+          userId: page.userId,
           pageId: page.id,
-          status: 'ACTIVE',
-        },
-      });
-
-      // Get transaction to get the plan ID
-      // Why PlanID?
-      // To get the limit available to the user
-      const transaction = await this.prisma.transaction.findFirstOrThrow({
-        where: {
-          id: subscription.transactionId,
+          status: SubscriptionStatus.ACTIVE,
         },
       });
 
@@ -47,26 +25,16 @@ export class RecieveHelpers {
       const service_amount_relation =
         await this.prisma.serviceAmountRelation.findFirstOrThrow({
           where: {
-            serviceId: service.id,
-            planId: transaction.planId,
+            serviceName: message_type,
+            planId: subscription.planId,
           },
         });
 
-      // Get the user stats
-      // To check the amount
-      // user has used
-      // const stats = await this.prisma.stats.findFirst({
-      //   where: {
-      //     userId: userId,
-      //     pageId: page.id,
-      //   },
-      // });
-
       const used = await this.prisma.messageCount.count({
         where: {
-          serviceId: service.id,
+          serviceName: message_type,
           pageId: page.id,
-          userId: userId,
+          userId: page.userId,
         },
       });
 
@@ -82,14 +50,13 @@ export class RecieveHelpers {
     }
   }
 
-  async addCount(userId: string, message_type: string) {
+  async addCount(
+    userId: string,
+    message_type: string,
+    insta_customer: UserDto,
+    failed = false,
+  ) {
     try {
-      const service = await this.prisma.service.findFirst({
-        where: {
-          name: message_type,
-        },
-      });
-
       // Get page
       const page = await this.prisma.page.findFirst({
         where: {
@@ -97,39 +64,70 @@ export class RecieveHelpers {
         },
       });
 
-      // TODO: Add customer
+      if (failed) {
+        const messageCount = await this.prisma.messageCount.create({
+          data: {
+            pageId: page.id,
+            userId: userId,
+            serviceName: message_type,
+            failed: true,
+          },
+        });
+
+        return {
+          message: 'ok',
+          count: messageCount,
+        };
+      }
+
       // Check if customer exists
-      // const customer = await this.prisma.customer.findFirst({
-      //   where: {
-      //     insta_id: user.insta_id,
-      //   },
-      // });
+      let customer = await this.prisma.customer.findFirst({
+        where: {
+          insta_id: insta_customer.insta_id,
+        },
+      });
 
-      // if (customer) {
-      //   const customer_user = await this.prisma.customerUser.findFirst({
-      //     where: {
-      //       userId: page.userId,
-      //     },
-      //   });
+      let customer_user = null;
 
-      //   if (!customer_user) {
-      //     // Create a relationship with customer
-      //   }
-      // } else {
-      //   const new_customer = await this.prisma.customer.create({
-      //     data: {
-      //       insta_id: insta_id,
-      //       name: userProfile.name,
-      //       username: userProfile.username,
-      //     },
-      //   });
-      // }
+      if (customer) {
+        customer_user = await this.prisma.customerUser.findFirst({
+          where: {
+            customerId: customer.id,
+            userId: page.userId,
+          },
+        });
+
+        if (!customer_user) {
+          // Create a relationship with customer
+          customer_user = await this.prisma.customerUser.create({
+            data: {
+              customerId: customer.id,
+              userId: userId,
+            },
+          });
+        }
+      } else {
+        customer = await this.prisma.customer.create({
+          data: {
+            insta_id: insta_customer.insta_id,
+            name: insta_customer.name,
+            username: insta_customer.username,
+          },
+        });
+
+        customer_user = await this.prisma.customerUser.create({
+          data: {
+            customerId: customer.id,
+            userId: userId,
+          },
+        });
+      }
 
       const messageCount = await this.prisma.messageCount.create({
         data: {
           pageId: page.id,
           userId: userId,
-          serviceId: service.id,
+          serviceName: message_type,
         },
       });
 

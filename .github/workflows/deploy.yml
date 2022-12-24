@@ -35,6 +35,10 @@ jobs:
           echo PAPERTRAIL_USER=\"${{ secrets.PAPERTRAIL_USER }}\" >> .env
           echo PAPERTRAIL_TOKEN=\"${{ secrets.PAPERTRAIL_TOKEN }}\" >> .env
           echo CLIENT_SECRET=\"${{ secrets.CLIENT_SECRET }}\" >> .env
+
+          echo RAZORPAY_KEY_ID=\"${{ secrets.RAZORPAY_KEY_ID }}\" >> .env
+          echo RAZORPAY_KEY_SECRET=\"${{ secrets.RAZORPAY_KEY_SECRET }}\" >> .env
+          echo RAZORPAY_WEBHOOK_SECRET=\"${{ secrets.RAZORPAY_WEBHOOK_SECRET }}\" >> .env
           cat .env
 
       - name: Generate prisma Client

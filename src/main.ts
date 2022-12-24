@@ -2,9 +2,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as admin from 'firebase-admin';
-import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+// import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { logger_config } from './logger.config';
+// import { logger_config } from './logger.config';
 
 declare global {
   interface Date {
@@ -21,7 +21,7 @@ Date.prototype.addDays = function (days) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,
-    logger: WinstonModule.createLogger(logger_config),
+    // logger: WinstonModule.createLogger(logger_config),
   });
 
   app.useGlobalPipes(
@@ -47,7 +47,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.enableCors();
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  // app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   await app.listen(3001);
 }
 bootstrap();

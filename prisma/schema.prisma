@@ -127,10 +127,10 @@ model Service {
 model ServiceAmountRelation {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  serviceId String  @db.ObjectId
-  plan      Plan?   @relation(fields: [planId], references: [id])
-  planId    String? @db.ObjectId
+  service     Service @relation(fields: [serviceName], references: [name], onDelete: Cascade)
+  serviceName String
+  plan        Plan?   @relation(fields: [planId], references: [id])
+  planId      String? @db.ObjectId
 
   amount  Int @default(0)
   replies Int @default(0) // Reply limit (how many texts we will reply)

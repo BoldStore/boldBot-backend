@@ -268,14 +268,12 @@ export class RecieveService {
 
   handlePayload(payload: string) {
     let response: { text: string }[];
-    const user = {};
 
     // Set the response based on the payload
     if (payload === 'GET_STARTED') {
       // response = Response.genNuxMessage(user);
     }
     if (payload.includes('CARE')) {
-      const care = 'Help';
       // response = Response.genNuxMessage(care);
     }
 
@@ -290,7 +288,7 @@ export class RecieveService {
   ) {
     // Check if there is delay in the response
     if ('delay' in response) {
-      delay = response['delay'];
+      delay = response['delay'] as number;
       delete response['delay'];
     }
 

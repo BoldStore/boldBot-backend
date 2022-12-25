@@ -63,4 +63,4 @@ jobs:
         run: pm2 delete database 2> /dev/null ||true
 
       - name: Start prisma studio
-        run: pm2 start npm -- run database --
+        run: pm2 start --name "database" npm -- run database --

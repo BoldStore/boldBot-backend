@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FirebaseUser } from '@tfarras/nestjs-firebase-auth';
-import { User } from '@prisma/client';
+import { SubscriptionStatus, User } from '@prisma/client';
 import { PageDto } from './dto';
 import { GraphService } from 'src/graph/graph.service';
 
@@ -135,7 +135,8 @@ export class UserService {
   }
 
   async getMe(user: User) {
-    const me = await this.prisma.user.findFirst({
+    let me: any = null;
+    me = await this.prisma.user.findFirst({
       where: {
         id: user.id,
       },
@@ -143,6 +144,24 @@ export class UserService {
         pages: true,
       },
     });
+
+    const subscription = await this.prisma.subscription.findFirst({
+      where: {
+        userId: user.id,
+        status: SubscriptionStatus.ACTIVE,
+      },
+    });
+
+    const plan = await this.prisma.plan.findFirst({
+      where: {
+        id: subscription.planId,
+      },
+      include: {
+        services: true,
+      },
+    });
+
+    me = { ...me, subscription, plan };
     return me;
   }
 

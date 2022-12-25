@@ -78,9 +78,10 @@ export class RecieveService {
 
       if (!isAvailable) {
         await this.helper.addCount(
-          page.userId,
+          page,
           webhookEvent.postback.payload,
           user,
+          postback.title,
           true,
         );
         throw new HttpException('Limit Reached', 400);
@@ -100,9 +101,10 @@ export class RecieveService {
 
       // Add count
       await this.helper.addCount(
-        page.userId,
+        page,
         webhookEvent.postback.payload,
         user,
+        postback.title,
       );
 
       const response = [];
@@ -142,9 +144,10 @@ export class RecieveService {
 
       if (!isAvailable) {
         await this.helper.addCount(
-          page.userId,
+          page,
           MessageTypes.STORY_MENTION,
           user,
+          '',
           true,
         );
         throw new HttpException('Limit Reached', 400);
@@ -175,7 +178,7 @@ export class RecieveService {
       }
 
       // Add count
-      await this.helper.addCount(page.userId, MessageTypes.STORY_MENTION, user);
+      await this.helper.addCount(page, MessageTypes.STORY_MENTION, user, '');
     }
     return response;
   }
@@ -186,7 +189,7 @@ export class RecieveService {
     user: UserDto,
   ) {
     let response: any;
-    const message = webhookEvent.message.text.trim().toLowerCase();
+    const message_text = webhookEvent.message.text.trim().toLowerCase();
 
     const greetings = [
       'hi',
@@ -201,6 +204,7 @@ export class RecieveService {
 
     // Handle story reply
     if (webhookEvent?.message?.reply_to?.story) {
+      const replyText = webhookEvent.message.text;
       const isAvailable = await this.helper.validateLimit(
         page,
         MessageTypes.STORY_REPLY,
@@ -208,14 +212,14 @@ export class RecieveService {
 
       if (!isAvailable) {
         await this.helper.addCount(
-          page.userId,
+          page,
           MessageTypes.STORY_REPLY,
           user,
+          replyText,
           true,
         );
         throw new HttpException('Limit Reached', 400);
       }
-      const replyText = webhookEvent.message.text;
 
       const reply = await this.prisma.message.findFirst({
         where: {
@@ -244,12 +248,17 @@ export class RecieveService {
       }
 
       // Add count
-      await this.helper.addCount(page.userId, MessageTypes.STORY_REPLY, user);
+      await this.helper.addCount(
+        page,
+        MessageTypes.STORY_REPLY,
+        user,
+        replyText,
+      );
     }
 
     // To handle exclamations and words
-    message.replace('!', ' ');
-    const message_split = message.split(' ');
+    message_text.replace('!', ' ');
+    const message_split = message_text.split(' ');
 
     // Greeting
     if (
@@ -262,10 +271,12 @@ export class RecieveService {
       );
 
       if (!isAvailable) {
+        this.logger.error('FAILED TO REPLY, LIMIT REACHED');
         await this.helper.addCount(
-          page.userId,
+          page,
           MessageTypes.GREETING,
           user,
+          message_text,
           true,
         );
         throw new HttpException('Limit Reached', 400);
@@ -282,7 +293,12 @@ export class RecieveService {
       });
 
       // Add count
-      await this.helper.addCount(page.userId, MessageTypes.GREETING, user);
+      await this.helper.addCount(
+        page,
+        MessageTypes.GREETING,
+        user,
+        message_text,
+      );
 
       if (message?.texts?.length > 0) {
         const arr = [];
@@ -300,7 +316,7 @@ export class RecieveService {
     }
 
     // Live Agent
-    if (!response && message.includes('live agent')) {
+    if (!response && message_text.includes('live agent')) {
       response = {
         text: 'Okay, transferring you to a live agent now. I will reply to you personally',
       };

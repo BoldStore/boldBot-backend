@@ -219,6 +219,7 @@ model MessageCount {
   customerId String?   @db.ObjectId
 
   failed Boolean @default(false)
+  text   String
 
   createdAt DateTime @default(now())
 

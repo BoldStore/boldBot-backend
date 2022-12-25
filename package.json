@@ -21,7 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:generate": "npx prisma generate",
     "deploy": "docker compose -f docker-compose.yml -f production.yml up -d",
-    "docker-dev": "docker-compose up -d --build -V"
+    "docker-dev": "docker-compose up -d --build -V",
+    "database": "npx prisma studio"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",

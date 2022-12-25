@@ -46,7 +46,7 @@ export class RecieveHelpers {
       // Limit not exceeded
       return true;
     } catch (e) {
-      throw new HttpException(e.message, 500);
+      return false;
     }
   }
 

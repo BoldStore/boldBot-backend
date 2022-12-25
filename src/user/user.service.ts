@@ -135,7 +135,8 @@ export class UserService {
   }
 
   async getMe(user: User) {
-    let me = await this.prisma.user.findFirst({
+    let me: any = null;
+    me = await this.prisma.user.findFirst({
       where: {
         id: user.id,
       },
@@ -149,12 +150,18 @@ export class UserService {
         userId: user.id,
         status: SubscriptionStatus.ACTIVE,
       },
+    });
+
+    const plan = await this.prisma.plan.findFirst({
+      where: {
+        id: subscription.planId,
+      },
       include: {
-        plan: true,
+        services: true,
       },
     });
 
-    me = { ...me, ...subscription };
+    me = { ...me, subscription, plan };
     return me;
   }
 

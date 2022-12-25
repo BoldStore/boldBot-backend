@@ -78,7 +78,7 @@ export class RecieveService {
 
       if (!isAvailable) {
         await this.helper.addCount(
-          page.userId,
+          page,
           webhookEvent.postback.payload,
           user,
           true,
@@ -99,11 +99,7 @@ export class RecieveService {
       });
 
       // Add count
-      await this.helper.addCount(
-        page.userId,
-        webhookEvent.postback.payload,
-        user,
-      );
+      await this.helper.addCount(page, webhookEvent.postback.payload, user);
 
       const response = [];
       message.texts.forEach((text) => {
@@ -142,7 +138,7 @@ export class RecieveService {
 
       if (!isAvailable) {
         await this.helper.addCount(
-          page.userId,
+          page,
           MessageTypes.STORY_MENTION,
           user,
           true,
@@ -175,7 +171,7 @@ export class RecieveService {
       }
 
       // Add count
-      await this.helper.addCount(page.userId, MessageTypes.STORY_MENTION, user);
+      await this.helper.addCount(page, MessageTypes.STORY_MENTION, user);
     }
     return response;
   }
@@ -207,12 +203,7 @@ export class RecieveService {
       );
 
       if (!isAvailable) {
-        await this.helper.addCount(
-          page.userId,
-          MessageTypes.STORY_REPLY,
-          user,
-          true,
-        );
+        await this.helper.addCount(page, MessageTypes.STORY_REPLY, user, true);
         throw new HttpException('Limit Reached', 400);
       }
       const replyText = webhookEvent.message.text;
@@ -244,7 +235,7 @@ export class RecieveService {
       }
 
       // Add count
-      await this.helper.addCount(page.userId, MessageTypes.STORY_REPLY, user);
+      await this.helper.addCount(page, MessageTypes.STORY_REPLY, user);
     }
 
     // To handle exclamations and words
@@ -263,12 +254,7 @@ export class RecieveService {
 
       if (!isAvailable) {
         this.logger.error('FAILED TO REPLY, LIMIT REACHED');
-        await this.helper.addCount(
-          page.userId,
-          MessageTypes.GREETING,
-          user,
-          true,
-        );
+        await this.helper.addCount(page, MessageTypes.GREETING, user, true);
         throw new HttpException('Limit Reached', 400);
       }
       // Get greeting
@@ -283,7 +269,7 @@ export class RecieveService {
       });
 
       // Add count
-      await this.helper.addCount(page.userId, MessageTypes.GREETING, user);
+      await this.helper.addCount(page, MessageTypes.GREETING, user);
 
       if (message?.texts?.length > 0) {
         const arr = [];

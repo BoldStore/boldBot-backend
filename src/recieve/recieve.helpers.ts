@@ -39,7 +39,7 @@ export class RecieveHelpers {
       });
 
       if (used >= service_amount_relation.replies) {
-        throw new HttpException('Limit exceeded', 500);
+        return false;
       }
 
       // This means all is good
@@ -51,20 +51,12 @@ export class RecieveHelpers {
   }
 
   async addCount(
-    userId: string,
+    page: Page,
     message_type: string,
     insta_customer: UserDto,
     failed = false,
   ) {
-    this.logger.error('FAILED???', failed);
     try {
-      // Get page
-      const page = await this.prisma.page.findFirst({
-        where: {
-          userId: userId,
-        },
-      });
-
       // Check if customer exists
       let customer = await this.prisma.customer.findFirst({
         where: {
@@ -87,7 +79,7 @@ export class RecieveHelpers {
           customer_user = await this.prisma.customerUser.create({
             data: {
               customerId: customer.id,
-              userId: userId,
+              userId: page.userId,
             },
           });
         }
@@ -103,7 +95,7 @@ export class RecieveHelpers {
         customer_user = await this.prisma.customerUser.create({
           data: {
             customerId: customer.id,
-            userId: userId,
+            userId: page.userId,
           },
         });
       }
@@ -111,7 +103,7 @@ export class RecieveHelpers {
       const messageCount = await this.prisma.messageCount.create({
         data: {
           pageId: page.id,
-          userId: userId,
+          userId: page.userId,
           serviceName: message_type,
           customerId: customer.id,
           failed,

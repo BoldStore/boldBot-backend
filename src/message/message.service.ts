@@ -89,6 +89,7 @@ export class MessageService {
     try {
       const ice_breakers = [];
       const user_ice_breakers = new Array(...dto?.ice_breakers);
+      user_ice_breakers.pop();
       let free = false;
       await this.prisma.message.deleteMany({
         where: {
@@ -118,6 +119,8 @@ export class MessageService {
       if (subscription.plan.price == 0) {
         free = true;
       }
+
+      console.log(user_ice_breakers);
 
       for (let i = 0; i < user_ice_breakers?.length; i++) {
         const item = dto.ice_breakers[i];
@@ -151,9 +154,13 @@ export class MessageService {
             pageId: dto.pageId,
             userId: user.id,
             texts: {
-              create: {
-                key: '1',
-                value: 'Very easy! Just visit @boldbot.in',
+              createMany: {
+                data: [
+                  {
+                    key: '1',
+                    value: 'Very easy! Just visit @boldbot.in',
+                  },
+                ],
               },
             },
           },

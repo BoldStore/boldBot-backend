@@ -127,13 +127,18 @@ export class GraphService {
       const url = `${API_URL}/me/messenger_profile`;
       const data = {
         platform: 'instagram',
-        ice_breakers: iceBreakers.map((iceBreaker) => {
-          if (iceBreaker.question)
-            return {
-              question: iceBreaker?.question,
-              payload: 'ice-breaker',
-            };
-        }),
+        ice_breakers: [
+          {
+            call_to_actions: iceBreakers.map((iceBreaker) => {
+              if (iceBreaker.question)
+                return {
+                  question: iceBreaker?.question,
+                  payload: 'ice-breaker',
+                };
+            }),
+            locale: 'default',
+          },
+        ],
       };
 
       await axios.post(url, data, {

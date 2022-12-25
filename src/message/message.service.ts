@@ -1,5 +1,5 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { SubscriptionStatus, User } from '@prisma/client';
 import { GraphService } from 'src/graph/graph.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
@@ -88,6 +88,8 @@ export class MessageService {
   async addIceBreaker(user: User, dto: IceBreakerDto) {
     try {
       const ice_breakers = [];
+      const user_ice_breakers = new Array(...dto?.ice_breakers);
+      let free = false;
       await this.prisma.message.deleteMany({
         where: {
           userId: user.id,
@@ -102,7 +104,22 @@ export class MessageService {
         },
       });
 
-      for (let i = 0; i < dto?.ice_breakers?.length; i++) {
+      const subscription = await this.prisma.subscription.findFirst({
+        where: {
+          userId: user.id,
+          pageId: page.id,
+          status: SubscriptionStatus.ACTIVE,
+        },
+        include: {
+          plan: true,
+        },
+      });
+
+      if (subscription.plan.price == 0) {
+        free = true;
+      }
+
+      for (let i = 0; i < user_ice_breakers?.length; i++) {
         const item = dto.ice_breakers[i];
         if (!item.question) continue;
         const ice_breaker = await this.prisma.message.create({
@@ -119,6 +136,24 @@ export class MessageService {
                     value: text.value,
                   };
                 }),
+              },
+            },
+          },
+        });
+        ice_breakers.push(ice_breaker);
+      }
+
+      if (free) {
+        const ice_breaker = await this.prisma.message.create({
+          data: {
+            type: 'ice-breaker',
+            question: 'How did I do this?',
+            pageId: dto.pageId,
+            userId: user.id,
+            texts: {
+              create: {
+                key: '1',
+                value: 'Very easy! Just visit @boldbot.in',
               },
             },
           },
@@ -168,6 +203,17 @@ export class MessageService {
         },
       });
 
+      const subscription = await this.prisma.subscription.findFirst({
+        where: {
+          userId: user.id,
+          pageId: dto.pageId,
+          status: SubscriptionStatus.ACTIVE,
+        },
+        include: {
+          plan: true,
+        },
+      });
+
       for (let i = 0; i < dto?.menu?.length; i++) {
         const item = dto.menu[i];
         if (!item.question) {
@@ -195,7 +241,29 @@ export class MessageService {
         menu_list.push(item?.question);
       }
 
-      if (dto.web_data) {
+      // If plan is free, do not let
+      // user edit link
+      // BOLDbot link will be shown
+      if (subscription.plan.price == 0) {
+        const web_data = await this.prisma.message.create({
+          data: {
+            type: 'persistent-menu',
+            pageId: dto.pageId,
+            userId: user.id,
+            texts: {
+              createMany: {
+                data: {
+                  key: 'Visit BOLDbot',
+                  value: 'https://boldbot.in',
+                },
+              },
+            },
+          },
+        });
+        menu.push(web_data);
+      }
+
+      if (subscription.plan.price != 0 && dto.web_data) {
         const web_data = await this.prisma.message.create({
           data: {
             type: 'persistent-menu',

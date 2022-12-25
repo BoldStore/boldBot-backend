@@ -56,7 +56,7 @@ export class RecieveHelpers {
     insta_customer: UserDto,
     failed = false,
   ) {
-    console.log('FAILED???', failed);
+    this.logger.error('FAILED???', failed);
     try {
       // Get page
       const page = await this.prisma.page.findFirst({

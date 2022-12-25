@@ -262,6 +262,7 @@ export class RecieveService {
       );
 
       if (!isAvailable) {
+        console.log('FAILED TO REPLY, LIMIT REACHED');
         await this.helper.addCount(
           page.userId,
           MessageTypes.GREETING,

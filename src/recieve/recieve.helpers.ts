@@ -56,6 +56,7 @@ export class RecieveHelpers {
     insta_customer: UserDto,
     failed = false,
   ) {
+    console.log('FAILED???', failed);
     try {
       // Get page
       const page = await this.prisma.page.findFirst({
@@ -63,22 +64,6 @@ export class RecieveHelpers {
           userId: userId,
         },
       });
-
-      if (failed) {
-        const messageCount = await this.prisma.messageCount.create({
-          data: {
-            pageId: page.id,
-            userId: userId,
-            serviceName: message_type,
-            failed: true,
-          },
-        });
-
-        return {
-          message: 'ok',
-          count: messageCount,
-        };
-      }
 
       // Check if customer exists
       let customer = await this.prisma.customer.findFirst({
@@ -129,6 +114,7 @@ export class RecieveHelpers {
           userId: userId,
           serviceName: message_type,
           customerId: customer.id,
+          failed,
         },
       });
 

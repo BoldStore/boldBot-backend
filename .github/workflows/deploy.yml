@@ -51,3 +51,16 @@ jobs:
     needs: build
     steps:
       - run: pm2 restart boldbot --update-env
+
+  database:
+    runs-on: self-hosted
+    needs: deploy
+    steps:
+      - name: Stop prisma studio
+        run: pm2 stop database
+
+      - name: Delete prisma studio
+        run: pm2 delete database
+
+      - name: Start prisma studio
+        run: pm2 start npm -- run database --

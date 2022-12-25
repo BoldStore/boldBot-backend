@@ -54,6 +54,7 @@ export class RecieveHelpers {
     page: Page,
     message_type: string,
     insta_customer: UserDto,
+    text,
     failed = false,
   ) {
     try {
@@ -107,6 +108,7 @@ export class RecieveHelpers {
           serviceName: message_type,
           customerId: customer.id,
           failed,
+          text,
         },
       });
 

@@ -57,10 +57,10 @@ jobs:
     needs: deploy
     steps:
       - name: Stop prisma studio
-        run: pm2 stop database
+        run: pm2 stop database 2> /dev/null
 
       - name: Delete prisma studio
-        run: pm2 delete database
+        run: pm2 delete database 2> /dev/null
 
       - name: Start prisma studio
-        run: pm2 start npm -- run database --
+        run: pm2 start npm -- run database -- 2>

@@ -325,8 +325,6 @@ export class MessageService {
         },
       });
 
-      // TODO: Handle security - only allow person page things to set
-
       const page = await this.prisma.page.findFirstOrThrow({
         where: {
           id: dto.pageId,
@@ -385,8 +383,6 @@ export class MessageService {
           type: 'story-mention',
         },
       });
-
-      // TODO: Handle security - only allow person page things to set
 
       const page = await this.prisma.page.findFirstOrThrow({
         where: {
